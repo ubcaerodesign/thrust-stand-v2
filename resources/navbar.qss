@@ -1,0 +1,18 @@
+QFrame {
+    background-color: #2b2d30;
+}
+
+QPushButton {
+    border-radius: 4px;
+    color: #eee;
+    background: #2b2d30;
+    text-align: left;
+    font-size: 10pt;
+    font-family: "Roboto";
+    border: none;
+    padding: 8px;
+}
+
+QPushButton:hover {
+    background: #555;
+}
