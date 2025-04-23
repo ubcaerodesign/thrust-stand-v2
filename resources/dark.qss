@@ -97,15 +97,21 @@ QScrollBar::add-page:vertical {
 
 QPushButton {
     color: #eee;
-    background: #1e1f22;
+    background: #3e3e3e;
     text-align: left;
     font-size: 10pt;
     font-family: "Roboto";
-    border: none;
+    border: 1px solid #555;
     border-radius: 4px;
-    padding: 8px;
+    padding: 4px;
 }
 
 QPushButton:hover {
     background: #555;
+}
+
+QFrame#panel {
+    background-color: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 4px;
 }

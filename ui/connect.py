@@ -14,9 +14,16 @@ class Connect(QFrame):
         with open(qss, "r") as f:
             self.setStyleSheet(f.read())
 
+        iconBtnQss = "resources/iconBtn.qss"
+        iconBtnStyle = None
+        with open(iconBtnQss, "r") as f:
+            iconBtnStyle = f.read()
+
+        # split into two sections, top control bar and bottom console
         mainLayout = QVBoxLayout(self)
         topLayout = QHBoxLayout()
 
+        # top control bar including the com port selector, refresh, and connect buttons
         self.comPortSelector = ComPortSelector()
         topLayout.addWidget(self.comPortSelector)
 
@@ -24,11 +31,7 @@ class Connect(QFrame):
         refreshIcon = QIcon("icons/refresh.png")
         refreshBtn.setIcon(refreshIcon)
         refreshBtn.setIconSize(QSize(18, 18))
-        refreshBtn.setStyleSheet("""QPushButton {
-            padding-left:   9px;
-            padding-top:    9px;
-            padding-right:  5px;
-            padding-bottom: 9px;}""")
+        refreshBtn.setStyleSheet(iconBtnStyle)
         refreshBtn.clicked.connect(self.comPortSelector.refresh_ports)
         topLayout.addWidget(refreshBtn)
 
@@ -36,18 +39,14 @@ class Connect(QFrame):
         connectIcon = QIcon("icons/connect.png")
         connectBtn.setIcon(connectIcon)
         connectBtn.setIconSize(QSize(20, 20))
-        connectBtn.setStyleSheet("""QPushButton {
-            padding-left:   9px;
-            padding-top:    9px;
-            padding-right:  5px;
-            padding-bottom: 9px;}""")
+        connectBtn.setStyleSheet(iconBtnStyle)
         connectBtn.clicked.connect(self.connect)
         topLayout.addWidget(connectBtn)
 
         topLayout.addStretch()
-
         mainLayout.addLayout(topLayout)
 
+        # console that dumps all serial communication for debugging
         self.serialMonitor = SerialMonitorWidget()
         mainLayout.addWidget(self.serialMonitor)
 
@@ -59,6 +58,9 @@ class Connect(QFrame):
 
 
 class SerialReaderThread(QThread):
+    """
+    Mostly vibecoded lol
+    """
     data_received = pyqtSignal(str)
 
     def __init__(self, port: str, baudrate: int = 9600):
@@ -100,6 +102,9 @@ class SerialReaderThread(QThread):
 
 
 class SerialMonitorWidget(QWidget):
+    """
+    50% good vibes (vibecoded), 50% bad vibes (had to do it myself)
+    """
     def __init__(self):
         super().__init__()
 
