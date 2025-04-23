@@ -1,8 +1,8 @@
 # entire file is vibecoded
 
-import config
-
 import re
+
+from . import config
 
 def decode(line):
     """

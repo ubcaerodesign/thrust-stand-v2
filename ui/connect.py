@@ -4,6 +4,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFrame, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QComboBox, QPlainTextEdit
 
+from serial import SerialException
+
 import board
 
 
@@ -70,27 +72,24 @@ class SerialReaderThread(QThread):
         self.port = port
         self.baudrate = baudrate
         self._running = True
-        self.ser = None
 
     def run(self):
         """
         Thread loop: opens serial port and emits each received line.
         """
-        try:
-            self.ser = serial.Serial(self.port, self.baudrate, timeout=1)
-        except serial.SerialException as e:
-            # handle error (port unavailable, etc.)
-            self.data_received.emit(f"Error opening serial port {self.port}: {e}")
-            return
+        if board.connect(self.port, self.baudrate):
+            self.data_received.emit(f"Connected to serial port {self.port}")
+        else:
+            self.data_received.emit(f"Error opening serial port {self.port}")
 
         while self._running:
             try:
-                if self.ser.in_waiting:
-                    line = self.ser.readline().decode('utf-8', errors='replace')
+                line = board.getLine()
+                if line is not None:
                     self.data_received.emit(line)
-            except Exception as e:
-                print(f"Serial read error: {e}")
-                break
+            except SerialException:
+                self.data_received.emit("COM port disconnected")
+
 
     def stop(self):
         """
