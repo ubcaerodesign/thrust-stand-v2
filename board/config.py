@@ -2,6 +2,8 @@ COMPort = "COM0"
 
 ser = None
 
+readQThread = None
+
 cell1 = 0
 cell2 = 0
 current = 0

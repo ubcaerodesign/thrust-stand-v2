@@ -54,7 +54,7 @@ QComboBox QAbstractItemView::item:hover {
     background-color: #555;
 }
 
-QPlainTextEdit {
+QPlainTextEdit#console {
     background-color:  #1e1e1e;       /* editor background */
     color:             #eee;       /* default text */
     font-family:       "Consolas", "Courier New", monospace;
@@ -62,6 +62,16 @@ QPlainTextEdit {
     border:            1px solid #3c3c3c;
     border-radius:     4px;
     padding:           6px;           /* internal padding */
+}
+
+QPlainTextEdit {
+    background-color:  #1e1e1e;       /* editor background */
+    color:             #eee;       /* default text */
+    font-family:       "Consolas", "Courier New", monospace;
+    font-size:         10pt;
+    border:            1px solid #3c3c3c;
+    border-radius:     4px;
+    padding:           0px;           /* internal padding */
 }
 
 QScrollBar:vertical,

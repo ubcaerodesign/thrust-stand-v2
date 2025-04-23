@@ -63,7 +63,7 @@ class Connect(QFrame):
 
 class SerialReaderThread(QThread):
     """
-    Mostly vibecoded lol
+    Somewhat vibecoded lol
     """
     data_received = pyqtSignal(str)
 
@@ -96,13 +96,17 @@ class SerialReaderThread(QThread):
         Cleanly stop the thread and close the serial port.
         """
         self._running = False
-        if self.ser and self.ser.is_open:
-            self.ser.close()
+        board.disconnect()
         self.quit()
         self.wait()
 
 
 class SerialMonitorWidget(QWidget):
+    # TODO: implement scrolling logic that stops autoscrolling when manually scrolling using scroll wheel
+    # TODO: implement limit on amount of console lines possible
+    # TODO: implement a command prompt style setup to directly address the arduino
+    # TODO: implement a filter to hide all arduino data transmissions
+    # TODO: implement a function to change polling rate on arduino
     """
     50% good vibes (vibecoded), 50% bad vibes (had to do it myself)
     """
@@ -113,6 +117,7 @@ class SerialMonitorWidget(QWidget):
         layout = QVBoxLayout(self)
         self.textbox = QPlainTextEdit()
         self.textbox.setReadOnly(True)
+        self.textbox.setObjectName("console")
         layout.addWidget(self.textbox)
 
         # Create reader variable

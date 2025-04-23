@@ -1,11 +1,13 @@
+from . import config
+
 def zeroThrust():
-    pass
+    config.thrustOffset = config.cell1
 
 def zeroTorque():
-    pass
+    config.torqueOffset = config.cell2
 
 def zeroCurrent():
-    pass
+    config.currentOffset = config.current
 
 def zeroVoltage():
-    pass
+    config.voltageOffset = config.voltage
