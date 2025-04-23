@@ -30,21 +30,22 @@ class CalibrationWidget(QWidget):
 
         # label
         lbl = QLabel("Calibration:")
-        calibrationPanelLayout.addWidget(lbl)
+        calibrationPanelLayout.addWidget(lbl, stretch=0)
 
         # master calibration button
         allCalBtn = QPushButton("All")
-        calibrationPanelLayout.addWidget(allCalBtn)
+        allCalBtn.setStyleSheet("QPushButton {background-color: #48655a}")
+        calibrationPanelLayout.addWidget(allCalBtn, stretch=1)
 
         # individual calibration buttons
         thrustCalBtn = QPushButton("Thrust")
         torqueCalBtn = QPushButton("Torque")
         currentCalBtn = QPushButton("Current")
         voltageCalBtn = QPushButton("Voltage")
-        calibrationPanelLayout.addWidget(thrustCalBtn)
-        calibrationPanelLayout.addWidget(torqueCalBtn)
-        calibrationPanelLayout.addWidget(currentCalBtn)
-        calibrationPanelLayout.addWidget(voltageCalBtn)
+        calibrationPanelLayout.addWidget(thrustCalBtn, stretch=1)
+        calibrationPanelLayout.addWidget(torqueCalBtn, stretch=1)
+        calibrationPanelLayout.addWidget(currentCalBtn, stretch=1)
+        calibrationPanelLayout.addWidget(voltageCalBtn, stretch=1)
 
         mainLayout.addStretch()
 

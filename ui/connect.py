@@ -4,6 +4,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFrame, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QComboBox, QPlainTextEdit
 
+import board
+
 
 class Connect(QFrame):
     def __init__(self):
