@@ -1,5 +1,7 @@
 import sys
 
+import PyQt5
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QWidget
 
 from .navbar import NavBar
@@ -11,8 +13,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("AeroThrust")
-        self.setMinimumSize(800, 600)
-        self.resize(800, 600)
+        self.setMinimumSize(800, 500)
+        self.resize(800, 500)
 
         self.activeWindows = {
             "Connect": [True, Connect()],
@@ -60,6 +62,11 @@ class MainWindow(QMainWindow):
 
 
 def startWindow():
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     app = QApplication(sys.argv + ['-platform', 'windows:darkmode=1'])
     window = MainWindow()
     window.show()
