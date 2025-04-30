@@ -128,12 +128,19 @@ class DataGraph(FigureCanvasQTAgg):
         self.axes = fig.add_subplot(111)
         self.axes.set_xlim(history, 0)
         self.axes.set_xlabel("time (s)")
-
+        # Add a fixed grey x-axis line at y=0
+        self._xaxis_line = self.axes.axhline(0, color="#888", linewidth=1, zorder=1)
         super().__init__(fig)
 
     def updateGraph(self):
         self.axes.relim()
         self.axes.autoscale(axis='y')
+        ymin, ymax = self.axes.get_ylim()
+        # Always include y=0 in the visible range
+        self.axes.set_ylim(bottom=min(-1, ymin), top=max(1, ymax))
+        # Update x-axis line to span current x-limits
+        xlim = self.axes.get_xlim()
+        self._xaxis_line.set_xdata(xlim)
         self.draw()
 
     def changeTimeFrame(self, start, end):
