@@ -1,6 +1,7 @@
 New UI for thrust stand
 
 Roadmap:
+- eeprom board data info
 - data visualization
 - command prompt style interaction + muting data transfers
 - mv wind speed sensing
