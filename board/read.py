@@ -47,14 +47,18 @@ class SerialReaderThread(QObject):
         """
         if line.startswith("lc1("):
             config.cell1 = _parse_long_or_none(line)
-            self.cell1Received.emit(config.cell1 - config.thrustOffset)
+            if config.cell1 is not None:
+                self.cell1Received.emit(config.cell1 - config.thrustOffset)
         elif line.startswith("lc2("):
             config.cell2 = _parse_long_or_none(line)
-            self.cell2Received.emit(config.cell2 - config.torqueOffset)
+            if config.cell2 is not None:
+                self.cell2Received.emit(config.cell2 - config.torqueOffset)
         elif line.startswith("cur("):
             config.current = _parse_float(line)
-            self.currentReceived.emit(round(config.current - config.currentOffset, 2))
+            if config.current is not None:
+                self.currentReceived.emit(round(config.current - config.currentOffset, 2))
         elif line.startswith("vtg("):
             config.voltage = _parse_float(line)
-            self.voltageReceived.emit(round(config.voltage - config.voltageOffset, 2))
+            if config.voltage is not None:
+                self.voltageReceived.emit(round(config.voltage - config.voltageOffset, 2))
 

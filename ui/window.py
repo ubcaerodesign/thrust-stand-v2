@@ -1,4 +1,4 @@
-import sys
+import sys, traceback
 
 import PyQt5
 from PyQt5 import QtCore
@@ -61,6 +61,12 @@ class MainWindow(QMainWindow):
                 self.activeWindows[w][0] = False
 
 
+def excepthook(exc_type, exc_value, exc_tb):
+    # print the full Python traceback
+    traceback.print_exception(exc_type, exc_value, exc_tb)
+    # call the default handler in case Qt/IDE needs it
+    sys.__excepthook__(exc_type, exc_value, exc_tb)
+
 def startWindow():
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -68,6 +74,7 @@ def startWindow():
     if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
         PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     app = QApplication(sys.argv + ['-platform', 'windows:darkmode=1'])
+    sys.excepthook = excepthook
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
