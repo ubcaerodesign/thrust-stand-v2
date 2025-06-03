@@ -2,8 +2,6 @@ import re
 
 from PyQt5.QtCore import pyqtSignal, QObject
 
-from . import config
-
 
 def _parse_long_or_none(line):
     """
@@ -26,15 +24,21 @@ def _parse_float(line):
     return None
 
 
-# TODO: rename this class as this is not actually a thread
-class SerialReaderThread(QObject):
+class SerialReader(QObject):
+    cell1 = 0
+    cell2 = 0
+    voltage = 0
+    current = 0
+
     cell1Received = pyqtSignal(int)
     cell2Received = pyqtSignal(int)
     currentReceived = pyqtSignal(float)
     voltageReceived = pyqtSignal(float)
 
-    def __init__(self):
+    def __init__(self, offsetDict):
         super().__init__()
+
+        self.offsetDict = offsetDict
 
     def decode(self, line: str):
         """
@@ -46,19 +50,19 @@ class SerialReaderThread(QObject):
         - vtg(<float>)
         """
         if line.startswith("lc1("):
-            config.cell1 = _parse_long_or_none(line)
-            if config.cell1 is not None:
-                self.cell1Received.emit(config.cell1 - config.thrustOffset)
+            self.cell1 = _parse_long_or_none(line)
+            if self.cell1 is not None:
+                self.cell1Received.emit(self.cell1 - self.offsetDict["cell1"])
         elif line.startswith("lc2("):
-            config.cell2 = _parse_long_or_none(line)
-            if config.cell2 is not None:
-                self.cell2Received.emit(config.cell2 - config.torqueOffset)
+            self.cell2 = _parse_long_or_none(line)
+            if self.cell2 is not None:
+                self.cell2Received.emit(self.cell2 - self.offsetDict["cell2"])
         elif line.startswith("cur("):
-            config.current = _parse_float(line)
-            if config.current is not None:
-                self.currentReceived.emit(round(config.current - config.currentOffset, 2))
+            self.current = _parse_float(line)
+            if self.current is not None:
+                self.currentReceived.emit(round(self.current - self.offsetDict["current"], 2))
         elif line.startswith("vtg("):
-            config.voltage = _parse_float(line)
-            if config.voltage is not None:
-                self.voltageReceived.emit(round(config.voltage - config.voltageOffset, 2))
+            self.voltage = _parse_float(line)
+            if self.voltage is not None:
+                self.voltageReceived.emit(round(self.voltage - self.offsetDict["voltage"], 2))
 

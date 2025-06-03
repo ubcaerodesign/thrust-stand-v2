@@ -1,6 +1,4 @@
-from . import config
-
-def setAll(enable: bool):
+"""def setAll(enable: bool):
     setLc1(enable)
     setLc2(enable)
     setVtg(enable)
@@ -16,4 +14,4 @@ def setVtg(enable: bool):
     config.ser.write(f"vtg({1 if enable else 0})\n)")
 
 def setCur(enable: bool):
-    config.ser.write(f"cur({1 if enable else 0})\n)")
+    config.ser.write(f"cur({1 if enable else 0})\n)")"""

@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QFrame, QWidget, QHBoxLayout, QVBoxLayout, QPushButt
     QLayout, QSizePolicy
 
 import board
-from board import calibration
 
 
 class Board(QFrame):
@@ -50,13 +49,13 @@ class CalibrationWidget(QWidget):
 
         # individual calibration buttons
         thrustCalBtn = QPushButton("Thrust")
-        thrustCalBtn.clicked.connect(board.calibration.zeroThrust)
+        thrustCalBtn.clicked.connect(board.zeroCell1)
         torqueCalBtn = QPushButton("Torque")
-        torqueCalBtn.clicked.connect(board.calibration.zeroTorque)
+        torqueCalBtn.clicked.connect(board.zeroCell2)
         currentCalBtn = QPushButton("Current")
-        currentCalBtn.clicked.connect(board.calibration.zeroCurrent)
+        currentCalBtn.clicked.connect(board.zeroCurrent)
         voltageCalBtn = QPushButton("Voltage")
-        voltageCalBtn.clicked.connect(board.calibration.zeroVoltage)
+        voltageCalBtn.clicked.connect(board.zeroVoltage)
         calibrationPanelLayout.addWidget(thrustCalBtn, 0, 2)
         calibrationPanelLayout.addWidget(torqueCalBtn, 0, 3)
         calibrationPanelLayout.addWidget(currentCalBtn, 0, 4)
@@ -67,22 +66,22 @@ class CalibrationWidget(QWidget):
         self.thrustReading.setReadOnly(True)
         self.thrustReading.setFixedHeight(27)
         self.thrustReading.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        board.config.readQThread.cell1Received.connect(self.updateThrust)
+        board.cell1Received.connect(self.updateThrust)
         self.torqueReading = QPlainTextEdit()
         self.torqueReading.setReadOnly(True)
         self.torqueReading.setFixedHeight(27)
         self.torqueReading.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        board.config.readQThread.cell2Received.connect(self.updateTorque)
+        board.cell2Received.connect(self.updateTorque)
         self.currentReading = QPlainTextEdit()
         self.currentReading.setReadOnly(True)
         self.currentReading.setFixedHeight(27)
         self.currentReading.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        board.config.readQThread.currentReceived.connect(self.updateCurrent)
+        board.currentReceived.connect(self.updateCurrent)
         self.voltageReading = QPlainTextEdit()
         self.voltageReading.setReadOnly(True)
         self.voltageReading.setFixedHeight(27)
         self.voltageReading.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        board.config.readQThread.voltageReceived.connect(self.updateVoltage)
+        board.voltageReceived.connect(self.updateVoltage)
         calibrationPanelLayout.addWidget(self.thrustReading, 1, 2)
         calibrationPanelLayout.addWidget(self.torqueReading, 1, 3)
         calibrationPanelLayout.addWidget(self.currentReading, 1, 4)
@@ -91,10 +90,10 @@ class CalibrationWidget(QWidget):
         mainLayout.addStretch()
 
     def calibrateAll(self):
-        board.calibration.zeroThrust()
-        board.calibration.zeroTorque()
-        board.calibration.zeroCurrent()
-        board.calibration.zeroVoltage()
+        board.zeroCell1()
+        board.zeroCell2()
+        board.zeroCurrent()
+        board.zeroVoltage()
 
     def updateThrust(self, data: int):
         self.thrustReading.setPlainText(str(data) + "g")
