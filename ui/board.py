@@ -41,7 +41,7 @@ class CalibrationWidget(QWidget):
         # master calibration button
         allCalBtn = QPushButton("All")
         # TODO: create an actual stylesheet
-        allCalBtn.setStyleSheet("QPushButton {background-color: #48655a}")
+        allCalBtn.setObjectName("greenBtn")
         allCalBtn.setMinimumSize(75, 60)
         allCalBtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         allCalBtn.clicked.connect(self.calibrateAll)

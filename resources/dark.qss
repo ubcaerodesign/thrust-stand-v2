@@ -120,8 +120,29 @@ QPushButton:hover {
     background: #555;
 }
 
+QPushButton#greenBtn {
+    color: #eee;
+    background: #48655a;
+    text-align: center;
+    font-size: 10pt;
+    font-family: "Roboto";
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 4px;
+}
+
 QFrame#panel {
     background-color: #1e1e1e;
     border: 1px solid #555;
     border-radius: 4px;
+}
+
+QLineEdit {
+    background-color:  #1e1e1e;       /* editor background */
+    color:             #eee;       /* default text */
+    font-family:       "Consolas", "Courier New", monospace;
+    font-size:         10pt;
+    border:            1px solid #3c3c3c;
+    border-radius:     4px;
+    padding:           6px;           /* internal padding */
 }

@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider
 
 import matplotlib
 
@@ -63,6 +64,20 @@ class Test(QFrame):
         mainLayout.addWidget(graph3, 1, 0)
         mainLayout.addWidget(graph4, 1, 1)
 
+        throttleSlider = QSlider(Qt.Horizontal)
+        mainLayout.addWidget(throttleSlider, 3, 0, 1, 2)
+
+        dataSave = DataSave()
+        mainLayout.addWidget(dataSave, 0, 2, 3, 1)
+
+
+class DataSave(QWidget):
+    def __init__(self):
+        super().__init__()
+        mainLayout = QVBoxLayout(self)
+        addDataButton = QPushButton("Save Point")
+        mainLayout.addWidget(addDataButton)
+
 
 class TimedBuffer:
     """
@@ -124,7 +139,7 @@ class TimedBuffer:
 
 class DataGraph(FigureCanvasQTAgg):
     def __init__(self, history=30):
-        fig = Figure()
+        fig = Figure(constrained_layout=True)
         self.axes = fig.add_subplot(111)
         self.axes.set_xlim(history, 0)
         self.axes.set_xlabel("time (s)")

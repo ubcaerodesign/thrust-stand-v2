@@ -1,5 +1,7 @@
 import serial
 
+from typing import Optional
+
 from . import read
 
 """
@@ -11,7 +13,7 @@ reader must be a QObject class in order to be compatible with the PyQt library
 
 COMPort = "COM0"
 
-ser = None
+ser: Optional[serial.Serial] = None
 
 offsetDict = {
     "cell1": 0,
@@ -74,3 +76,13 @@ def zeroCurrent():
 def zeroVoltage():
     global offsetDict
     offsetDict["voltage"] = reader.voltage
+
+def sendCommand(command: str):
+    if ser and ser.is_open:
+        try:
+            ser.write((command + "\n").encode('utf-8'))
+            return True
+        except Exception:
+            return False
+    else:
+        return False
