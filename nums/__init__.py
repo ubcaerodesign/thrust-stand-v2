@@ -17,4 +17,4 @@ class Datasheet:
         return self.dataframe
 
     def export(self, filename):
-        self.dataframe.to_excel(filename, index=False)
+        self.dataframe.to_csv(filename, index=False)

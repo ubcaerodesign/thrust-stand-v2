@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView, \
+    QHBoxLayout, QFileDialog
 
 import matplotlib
 
@@ -136,9 +137,16 @@ class DataSave(QWidget):
         table.verticalHeader().setMinimumWidth(32)
         mainLayout.addWidget(table)
 
+        controlsLayout = QHBoxLayout()
         addDataButton = QPushButton("Save Point")
         addDataButton.clicked.connect(self.addPoint)
-        mainLayout.addWidget(addDataButton)
+        controlsLayout.addWidget(addDataButton)
+
+        exportButton = QPushButton("Export Data")
+        exportButton.clicked.connect(self.exportData)
+        controlsLayout.addWidget(exportButton)
+
+        mainLayout.addLayout(controlsLayout)
 
     def addPoint(self):
         dataPoint = {
@@ -151,6 +159,16 @@ class DataSave(QWidget):
         }
         self.datasheet.addPoint(dataPoint)
         self.model.appendRow(dataPoint)
+
+    def exportData(self):
+        filePath, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export Data",
+            "",
+            "CSV (*.csv);;All Files (*)"
+        )
+        if filePath:
+            self.datasheet.export(filePath)
 
 
 class TimedBuffer:
