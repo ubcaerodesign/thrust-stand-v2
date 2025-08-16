@@ -6,3 +6,6 @@
 /dataSources/
 /dataSources.local.xml
 /.idea/
+/build/
+/dist/
+/main.spec/
