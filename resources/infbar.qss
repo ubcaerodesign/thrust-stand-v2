@@ -10,3 +10,10 @@ QLabel#green {
     font-size: 10pt;
     font-family: "Roboto";
 }
+
+QLabel#red {
+    background-color: #c94f4f;
+    color: #eee;
+    font-size: 10pt;
+    font-family: "Roboto";
+}

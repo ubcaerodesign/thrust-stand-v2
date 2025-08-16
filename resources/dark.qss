@@ -208,3 +208,38 @@ QTableCornerButton::section {
     border: 1px solid #444444;
 }
 /* Table view */
+
+/* Checkbox */
+QCheckBox {
+    color: #f0f0f0;
+    font-size: 14px;
+}
+
+QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid #555;
+    background-color: #1e1e1e;
+    border-radius: 4px;
+}
+
+QCheckBox::indicator:unchecked:hover {
+    border: 2px solid #555;
+    background-color: #555555;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid #638b7c;
+    background-color: #48655a;
+    border-radius: 4px;
+    image: url(:/icons/checkmark_white.png); /* optional custom check icon */
+}
+
+QCheckBox::indicator:checked:hover {
+    border: 2px solid #638b7c;
+    background-color: #638b7c;
+}
+/* Checkbox */

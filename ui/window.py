@@ -1,9 +1,4 @@
-import sys, traceback
-
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QWidget, QVBoxLayout, QSplashScreen
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QVBoxLayout
 
 from .navbar import NavBar
 from .infobar import InfoBar
@@ -18,8 +13,10 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1100, 600)
         self.resize(1100, 600)
 
+        infBar = InfoBar()
+
         self.activeWindows = {
-            "Connect": [True, Connect()],
+            "Connect": [True, Connect(infBar.setConnected, infBar.setDisconnected)],
             "Test": [False, Test()],
             "Board": [False, Board()]
         }
@@ -39,7 +36,6 @@ class MainWindow(QMainWindow):
         sidebar.boardBtn.clicked.connect(self.board)
         self.horLayout.addWidget(sidebar)
 
-        infBar = InfoBar()
         self.mainLayout.addWidget(infBar)
 
         self.horLayout.addWidget(self.activeWindows["Connect"][1])

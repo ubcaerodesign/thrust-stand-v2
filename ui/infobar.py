@@ -16,8 +16,21 @@ class InfoBar(QFrame):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
-        boardStatusLabel = QLabel()
-        boardStatusLabel.setText("CONNECTED")
-        boardStatusLabel.setObjectName("green")
+        self.boardStatusLabel = QLabel()
+        self.setDisconnected()
 
-        self.mainLayout.addWidget(boardStatusLabel)
+        self.mainLayout.addWidget(self.boardStatusLabel)
+
+    def setConnected(self):
+        self.boardStatusLabel.setText("CONNECTED")
+        self.boardStatusLabel.setObjectName("green")
+        self.boardStatusLabel.style().unpolish(self.boardStatusLabel)
+        self.boardStatusLabel.style().polish(self.boardStatusLabel)
+        self.boardStatusLabel.update()
+
+    def setDisconnected(self):
+        self.boardStatusLabel.setText("NOT CONNECTED")
+        self.boardStatusLabel.setObjectName("red")
+        self.boardStatusLabel.style().unpolish(self.boardStatusLabel)
+        self.boardStatusLabel.style().polish(self.boardStatusLabel)
+        self.boardStatusLabel.update()

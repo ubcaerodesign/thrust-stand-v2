@@ -3,7 +3,7 @@ import serial.tools.list_ports
 from PyQt5.QtCore import QThread, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFrame, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QLabel, QComboBox, QPlainTextEdit, \
-    QLineEdit
+    QLineEdit, QCheckBox
 
 from serial import SerialException
 
@@ -12,7 +12,7 @@ import board
 
 class Connect(QFrame):
     # TODO: it is possible to connect to the same serial port multiple times resulting in incomprehensible data
-    def __init__(self):
+    def __init__(self, setConnected, setDisconnected):
         super().__init__()
 
         # set stylesheet
@@ -49,11 +49,20 @@ class Connect(QFrame):
         connectBtn.clicked.connect(self.connect)
         topLayout.addWidget(connectBtn)
 
+        # data transmission suppressor
+        suppressCheckbox = QCheckBox()
+        suppressCheckbox.setChecked(True)
+        suppressLabel = QLabel("Suppress data transmissions")
         topLayout.addStretch()
+        topLayout.addWidget(suppressCheckbox)
+        topLayout.addWidget(suppressLabel)
+        topLayout.addSpacing(15)
+
         mainLayout.addLayout(topLayout)
 
         # console that dumps all serial communication for debugging
-        self.serialMonitor = SerialMonitorWidget()
+        self.serialMonitor = SerialMonitorWidget(setConnected, setDisconnected)
+        suppressCheckbox.toggled.connect(self.suppressToggle)
         mainLayout.addWidget(self.serialMonitor)
 
         # input console
@@ -62,6 +71,12 @@ class Connect(QFrame):
 
         topLayout.setContentsMargins(5, 0, 0, 0)
         mainLayout.setContentsMargins(10, 15, 10, 10)
+
+    def suppressToggle(self, checked):
+        if checked:
+            self.serialMonitor.suppressDataTransmissions()
+        else:
+            self.serialMonitor.showDataTransmissions()
 
     def connect(self):
         self.serialMonitor.connectReader(self.comPortSelector.combo.currentText(), 9600)
@@ -84,9 +99,9 @@ class SerialReaderThread(QThread):
         Thread loop: opens serial port and emits each received line.
         """
         if board.connect(self.port, self.baudrate):
-            self.data_received.emit(f"Connected to serial port {self.port}")
+            self.data_received.emit(f"(i) Connected to serial port {self.port}")
         else:
-            self.data_received.emit(f"Error opening serial port {self.port}")
+            self.data_received.emit(f"(i) Error opening serial port {self.port}")
 
         while self._running:
             try:
@@ -94,14 +109,17 @@ class SerialReaderThread(QThread):
                 if line is not None:
                     self.data_received.emit(line)
             except SerialException:
-                self.data_received.emit("COM port disconnected")
+                self.stop()
 
     def stop(self):
         """
         Cleanly stop the thread and close the serial port.
         """
         self._running = False
-        board.disconnect()
+        if board.disconnect():
+            self.data_received.emit(f"(i) Disconnected from serial port {self.port}")
+        else:
+            self.data_received.emit("(i) Failed to disconnect serial port")
         self.quit()
         self.wait()
 
@@ -134,16 +152,16 @@ class SerialCommandSender(QWidget):
 
 
 class SerialMonitorWidget(QWidget):
-    # TODO: implement scrolling logic that stops autoscrolling when manually scrolling using scroll wheel
     # TODO: implement limit on amount of console lines possible
-    # TODO: implement a command prompt style setup to directly address the arduino
-    # TODO: implement a filter to hide all arduino data transmissions
     # TODO: implement a function to change polling rate on arduino
     """
     50% good vibes (vibecoded), 50% bad vibes (had to do it myself)
     """
-    def __init__(self):
+    def __init__(self, setConnected, setDisconnected):
         super().__init__()
+
+        self.setConnected = setConnected
+        self.setDisconnected = setDisconnected
 
         # Layout and read-only text area
         layout = QVBoxLayout(self)
@@ -158,28 +176,43 @@ class SerialMonitorWidget(QWidget):
         # Autoscroll control
         self.autoscroll = True
         self.textbox.verticalScrollBar().sliderMoved.connect(self.scrollBarMoved)
+        self.textbox.verticalScrollBar().valueChanged.connect(self.scrollBarMoved)
+
+        # data transmission suppression control
+        self.suppressTransmission = True
 
     def connectReader(self, port, baudrate):
         """
         Connects the reader to the serial port.
         """
-        self.reader = SerialReaderThread(port, baudrate)
-        self.reader.data_received.connect(self.appendText)
-        self.reader.start()
+        if self.reader is None:
+            self.reader = SerialReaderThread(port, baudrate)
+            self.reader.data_received.connect(self.appendText)
+            self.reader.finished.connect(self.reader.deleteLater)
+            self.reader.finished.connect(self.dereferenceReader)
+            self.reader.start()
+            self.setConnected()
+        else:
+            self.appendText("(i) Serial already connected")
+
+    def dereferenceReader(self):
+        self.reader = None
+        self.setDisconnected()
 
     def appendUserCommand(self, command: str):
-        self.appendText(">" + command)
+        self.appendText("> " + command)
 
     def appendText(self, text: str):
         """
         Append received text to the textbox, scrolling to the end.
         """
-        self.textbox.appendPlainText(text.rstrip())
-        # auto-scroll
-        if self.autoscroll:
-            cursor = self.textbox.textCursor()
-            cursor.movePosition(cursor.End)
-            self.textbox.setTextCursor(cursor)
+        if not (text.startswith("lc1(") or text.startswith("lc2(") or text.startswith("cur(") or text.startswith("vtg(")) or not self.suppressTransmission:
+            self.textbox.appendPlainText(text.rstrip())
+            # auto-scroll
+            if self.autoscroll:
+                cursor = self.textbox.textCursor()
+                cursor.movePosition(cursor.End)
+                self.textbox.setTextCursor(cursor)
 
     def closeEvent(self, event):
         """
@@ -195,6 +228,18 @@ class SerialMonitorWidget(QWidget):
         self.autoscroll = False
         if self.textbox.verticalScrollBar().value() == self.textbox.verticalScrollBar().maximum():
             self.autoscroll = True
+
+    def suppressDataTransmissions(self):
+        """
+        Suppresses data transmissions to avoid clutter in console
+        """
+        self.suppressTransmission = True
+
+    def showDataTransmissions(self):
+        """
+        Show data transmissions
+        """
+        self.suppressTransmission = False
 
 
 class ComPortSelector(QWidget):

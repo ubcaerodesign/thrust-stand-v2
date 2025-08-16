@@ -39,16 +39,10 @@ def connect(port: str, baudrate: int = 9600):
         return False
 
 def disconnect():
-    # TODO: implement a clean disconnect
-    """
-    reference code
-    self._running = False
-        if board.disconnect() and self.ser.is_open:
-            self.ser.close()
-        self.quit()
-        self.wait()
-    """
-    pass
+    if ser.is_open:
+        ser.close()
+        return True
+    return False
 
 def getLine():
     """
