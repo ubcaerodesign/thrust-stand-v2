@@ -1,10 +1,12 @@
 import sys, traceback
 
-import PyQt5
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QWidget, QVBoxLayout, QSplashScreen
 
 from .navbar import NavBar
+from .infobar import InfoBar
 from .connect import Connect
 from .test import Test
 from .board import Board
@@ -13,8 +15,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("AeroThrust")
-        self.setMinimumSize(800, 500)
-        self.resize(800, 500)
+        self.setMinimumSize(1100, 600)
+        self.resize(1100, 600)
 
         self.activeWindows = {
             "Connect": [True, Connect()],
@@ -22,25 +24,33 @@ class MainWindow(QMainWindow):
             "Board": [False, Board()]
         }
 
-        self.mLayout = QHBoxLayout()
-        self.mLayout.setContentsMargins(0, 0, 0, 0)
-        self.mLayout.setSpacing(0)
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
+
+        self.horLayout = QHBoxLayout()
+        self.horLayout.setContentsMargins(0, 0, 0, 0)
+        self.horLayout.setSpacing(0)
+        self.mainLayout.addLayout(self.horLayout)
 
         sidebar = NavBar()
         sidebar.testBtn.clicked.connect(self.test)
         sidebar.connectBtn.clicked.connect(self.connect)
         sidebar.boardBtn.clicked.connect(self.board)
-        self.mLayout.addWidget(sidebar)
+        self.horLayout.addWidget(sidebar)
 
-        self.mLayout.addWidget(self.activeWindows["Connect"][1])
-        self.mLayout.addWidget(self.activeWindows["Test"][1])
-        self.mLayout.addWidget(self.activeWindows["Board"][1])
+        infBar = InfoBar()
+        self.mainLayout.addWidget(infBar)
+
+        self.horLayout.addWidget(self.activeWindows["Connect"][1])
+        self.horLayout.addWidget(self.activeWindows["Test"][1])
+        self.horLayout.addWidget(self.activeWindows["Board"][1])
         self.activeWindows["Test"][1].hide()
         self.activeWindows["Board"][1].hide()
 
-        mWidget = QWidget()
-        mWidget.setLayout(self.mLayout)
-        self.setCentralWidget(mWidget)
+        mainWidget = QWidget()
+        mainWidget.setLayout(self.mainLayout)
+        self.setCentralWidget(mainWidget)
 
     def test(self):
         self.switchWindow("Test")
@@ -59,22 +69,3 @@ class MainWindow(QMainWindow):
             elif w != window and self.activeWindows[w][0]:
                 self.activeWindows[w][1].hide()
                 self.activeWindows[w][0] = False
-
-
-def excepthook(exc_type, exc_value, exc_tb):
-    # print the full Python traceback
-    traceback.print_exception(exc_type, exc_value, exc_tb)
-    # call the default handler in case Qt/IDE needs it
-    sys.__excepthook__(exc_type, exc_value, exc_tb)
-
-def startWindow():
-    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
-        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-
-    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
-        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
-    app = QApplication(sys.argv + ['-platform', 'windows:darkmode=1'])
-    sys.excepthook = excepthook
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())

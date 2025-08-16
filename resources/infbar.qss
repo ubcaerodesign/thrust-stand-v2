@@ -1,0 +1,12 @@
+QFrame {
+    background-color: #2b2d30;
+    border-top: 1px solid #3c3c3c;
+}
+
+
+QLabel#green {
+    background-color: #48655a;
+    color: #eee;
+    font-size: 10pt;
+    font-family: "Roboto";
+}

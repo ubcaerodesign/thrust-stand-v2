@@ -1,16 +1,20 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView
 
 import matplotlib
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
+import pandas as pd
+
 import time
 
 from collections import deque
 
 import board
+
+import nums
 
 matplotlib.use('Qt5Agg')
 matplotlib.rcParams.update({
@@ -65,18 +69,88 @@ class Test(QFrame):
         mainLayout.addWidget(graph4, 1, 1)
 
         throttleSlider = QSlider(Qt.Horizontal)
+        throttleSlider.setMinimum(0)
+        throttleSlider.setMaximum(100)
+        throttleSlider.setValue(0)
+        throttleSlider.valueChanged.connect(board.setThrottle)
+        throttleSlider.setTickPosition(QSlider.TicksBelow)
+        throttleSlider.setTickInterval(10)
         mainLayout.addWidget(throttleSlider, 3, 0, 1, 2)
 
-        dataSave = DataSave()
-        mainLayout.addWidget(dataSave, 0, 2, 3, 1)
+        dataSave = DataSave(graph1.getLastValue, graph2.getLastValue, graph3.getLastValue, graph4.getLastValue, throttleSlider.value)
+        mainLayout.addWidget(dataSave, 0, 2, 4, 1)
 
 
 class DataSave(QWidget):
-    def __init__(self):
+    class PandasTable(QAbstractTableModel):
+        """
+        Table class that displays the pd dataframe
+        """
+        def __init__(self, df=pd.DataFrame(), parent=None):
+            super().__init__(parent)
+            self.df = df
+
+        def rowCount(self, parent=None):
+            return len(self.df.index)
+
+        def columnCount(self, parent=None):
+            return len(self.df.columns)
+
+        def data(self, index, role=Qt.DisplayRole):
+            if index.isValid() and role == Qt.DisplayRole:
+                return str(self.df.iat[index.row(), index.column()])
+            return None
+
+        def headerData(self, section, orientation, role=Qt.DisplayRole):
+            if role == Qt.DisplayRole:
+                if orientation == Qt.Horizontal:
+                    return str(self.df.columns[section])
+                if orientation == Qt.Vertical:
+                    return str(self.df.index[section])
+            return None
+
+        def appendRow(self, row_dict):
+            new_index = len(self.df)
+            self.beginInsertRows(QModelIndex(), new_index, new_index)
+            self.df.loc[new_index] = row_dict
+            self.endInsertRows()
+
+    def __init__(self, getCell1, getCell2, getCurrent, getVoltage, getThrottle):
         super().__init__()
+
+        self.getCell1 = getCell1
+        self.getCell2 = getCell2
+        self.getCurrent = getCurrent
+        self.getVoltage = getVoltage
+        self.getThrottle = getThrottle
+
+        self.datasheet = nums.Datasheet(["Time", "Throttle", "Thrust", "Torque", "Voltage", "Current"])
+
         mainLayout = QVBoxLayout(self)
+
+        self.model = self.PandasTable(self.datasheet.getDF())
+        table = QTableView()
+        table.setModel(self.model)
+        table.setMinimumWidth(300)
+        table.verticalHeader().setVisible(True)
+        table.verticalHeader().setMinimumWidth(32)
+        mainLayout.addWidget(table)
+
         addDataButton = QPushButton("Save Point")
+        addDataButton.clicked.connect(self.addPoint)
         mainLayout.addWidget(addDataButton)
+
+    def addPoint(self):
+        dataPoint = {
+            "Time": None,
+            "Throttle": self.getThrottle(),
+            "Thrust": self.getCell1(),
+            "Torque": self.getCell2(),
+            "Voltage": self.getVoltage(),
+            "Current": self.getCurrent()
+        }
+        self.datasheet.addPoint(dataPoint)
+        self.model.appendRow(dataPoint)
 
 
 class TimedBuffer:
@@ -194,3 +268,6 @@ class AutoUpdateGraph(DataGraph):
             self._plotRef = self.axes.plot(xdata, ydata)[0]
 
         self.updateGraph()
+
+    def getLastValue(self):
+        return self.data.get_values()[-1] if self.data.get_values() else None

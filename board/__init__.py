@@ -77,6 +77,11 @@ def zeroVoltage():
     global offsetDict
     offsetDict["voltage"] = reader.voltage
 
+def setThrottle(throttle: int):
+    if throttle < 0 or throttle > 100:
+        raise ValueError("throttle must be between 0 and 100")
+    sendCommand(f"thr({throttle})")
+
 def sendCommand(command: str):
     if ser and ser.is_open:
         try:
