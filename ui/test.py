@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView, \
-    QHBoxLayout, QFileDialog
+    QHBoxLayout, QFileDialog, QSplitter
 
 import matplotlib
 
@@ -20,7 +20,7 @@ import nums
 matplotlib.use('Qt5Agg')
 matplotlib.rcParams.update({
     # Figure backgrounds
-    "figure.facecolor":   "#1e1f22",
+    "figure.facecolor":   "#1e1e1e",
     "figure.edgecolor":   "#2e2e2e",
 
     # Axes backgrounds
@@ -50,7 +50,15 @@ class Test(QFrame):
         with open(qss, "r") as f:
             self.setStyleSheet(f.read())
 
-        mainLayout = QGridLayout(self)
+        mainLayout = QVBoxLayout(self)
+        splitter = QSplitter(Qt.Horizontal)
+        mainLayout.addWidget(splitter)
+
+        monitorLayout = QGridLayout()
+        monitorWidget = QWidget()
+        monitorWidget.setLayout(monitorLayout)
+        monitorWidget.setMinimumSize(500, 0)
+        splitter.addWidget(monitorWidget)
 
         graph1 = AutoUpdateGraph(board.cell1Received)
         graph1.setTitle("Thrust")
@@ -64,10 +72,10 @@ class Test(QFrame):
         graph4 = AutoUpdateGraph(board.currentReceived)
         graph4.setTitle("Current")
         graph4.setYAxisTitle("(A)")
-        mainLayout.addWidget(graph1, 0, 0)
-        mainLayout.addWidget(graph2, 0, 1)
-        mainLayout.addWidget(graph3, 1, 0)
-        mainLayout.addWidget(graph4, 1, 1)
+        monitorLayout.addWidget(graph1, 0, 0)
+        monitorLayout.addWidget(graph2, 0, 1)
+        monitorLayout.addWidget(graph3, 1, 0)
+        monitorLayout.addWidget(graph4, 1, 1)
 
         throttleSlider = QSlider(Qt.Horizontal)
         throttleSlider.setMinimum(0)
@@ -76,10 +84,10 @@ class Test(QFrame):
         throttleSlider.valueChanged.connect(board.setThrottle)
         throttleSlider.setTickPosition(QSlider.TicksBelow)
         throttleSlider.setTickInterval(10)
-        mainLayout.addWidget(throttleSlider, 3, 0, 1, 2)
+        monitorLayout.addWidget(throttleSlider, 3, 0, 1, 2)
 
         dataSave = DataSave(graph1.getLastValue, graph2.getLastValue, graph3.getLastValue, graph4.getLastValue, throttleSlider.value)
-        mainLayout.addWidget(dataSave, 0, 2, 4, 1)
+        splitter.addWidget(dataSave)
 
 
 class DataSave(QWidget):

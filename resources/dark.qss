@@ -1,5 +1,5 @@
 QFrame {
-    background-color: #1e1f22;
+    background-color: #1e1e1e;
 }
 
 QLabel {
@@ -243,3 +243,43 @@ QCheckBox::indicator:checked:hover {
     background-color: #638b7c;
 }
 /* Checkbox */
+
+/* QSplitter */
+QSplitter {
+    background-color: #1e1e1e;      /* Dark background */
+    border: none;
+    padding: 0;
+}
+
+QSplitter::handle {
+    background-color: #2b2b2b;      /* Dark gray handle */
+    border: 1px solid #3a3a3a;      /* Subtle border for separation */
+}
+
+QSplitter::handle:horizontal {
+    height: 6px;                    /* Thicker handle for better usability */
+    margin: 0 2px;
+}
+
+QSplitter::handle:vertical {
+    width: 6px;                     /* Same for vertical */
+    margin: 2px 0;
+}
+
+QSplitter::handle:hover {
+    background-color: #3c3c3c;      /* Highlight when hovering */
+    border: 1px solid #4a4a4a;
+}
+
+QSplitter::handle:pressed {
+    background-color: #555555;      /* Active drag state */
+    border: 1px solid #666666;
+}
+/* QSplitter */
+
+/* QSlider */
+QSlider {
+    background-color: transparent;
+    padding: 6px;
+}
+/* QSlider */
