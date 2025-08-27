@@ -239,6 +239,15 @@ class DataSave(QWidget):
             # Update the label
             self.timerLabel.setText(html_text)
 
+        def getTimerValue(self):
+            if self.timerPaused:
+                returnValue = self.timePausedTimestamp
+            else:
+                returnValue = self.timer.elapsed() - self.timeDelta
+            if returnValue == 0:
+                return None
+            return returnValue
+
     def __init__(self, getCell1, getCell2, getCurrent, getVoltage, getThrottle):
         super().__init__()
 
@@ -252,8 +261,8 @@ class DataSave(QWidget):
 
         mainLayout = QVBoxLayout(self)
 
-        timerWidget = self.TimerWidget()
-        mainLayout.addWidget(timerWidget)
+        self.timerWidget = self.TimerWidget()
+        mainLayout.addWidget(self.timerWidget)
 
         self.model = self.PandasTable(self.datasheet.getDF())
         table = QTableView()
@@ -276,7 +285,7 @@ class DataSave(QWidget):
 
     def addPoint(self):
         dataPoint = {
-            "Time": None,
+            "Time": self.timerWidget.getTimerValue(),
             "Throttle": self.getThrottle(),
             "Thrust": self.getCell1(),
             "Torque": self.getCell2(),
