@@ -8,6 +8,12 @@ QLabel {
     font-family: "Roboto";
 }
 
+QLabel#large {
+    color: #eee;
+    font-size: 20pt;
+    font-family: "Roboto";
+}
+
 QComboBox {
     background-color: #3e3e3e;
     color: #ddd;

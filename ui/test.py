@@ -1,6 +1,7 @@
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QTimer, QSize, QElapsedTimer
+from PyQt5.QtGui import QPixmap, QIcon, QFont
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView, \
-    QHBoxLayout, QFileDialog, QSplitter
+    QHBoxLayout, QFileDialog, QSplitter, QLabel, QProgressBar, QSizePolicy
 
 import matplotlib
 
@@ -124,6 +125,120 @@ class DataSave(QWidget):
             self.df.loc[new_index] = row_dict
             self.endInsertRows()
 
+    class TimerWidget(QWidget):
+        def __init__(self):
+            super().__init__()
+
+            iconBtnQss = "resources/iconBtn.qss"
+            iconBtnStyle = None
+            with open(iconBtnQss, "r") as f:
+                iconBtnStyle = f.read()
+
+            mainLayout = QHBoxLayout(self)
+
+            self.timer = QElapsedTimer()
+            self.timer.restart()
+
+            self.timeDelta = 0
+            self.timePausedTimestamp = 0
+            self.timerPaused = True
+
+            self.uiUpdateTimer = QTimer()
+            self.uiUpdateTimer.timeout.connect(self.updateUI)
+            self.uiUpdateTimer.start(100)
+
+            timerPixmap = QPixmap("icons/timer.png")
+            timerIconLabel = QLabel()
+            timerIconLabel.setPixmap(timerPixmap)
+            timerIconLabel.setScaledContents(True)
+            timerIconLabel.setFixedSize(30, 32)
+            mainLayout.addWidget(timerIconLabel)
+
+            self.timerLabel = QLabel()
+            self.timerLabel.setText('<span style="color:#555555;">000.0</span>')
+            self.timerLabel.setObjectName("large")
+            self.timerLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            self.timerLabel.setAlignment(Qt.AlignCenter)
+            mainLayout.addWidget(self.timerLabel)
+
+            self.pauseAndResumeBtn = QPushButton()
+            connectIcon = QIcon("icons/play.png")
+            self.pauseAndResumeBtn.setIcon(connectIcon)
+            self.pauseAndResumeBtn.setIconSize(QSize(20, 20))
+            self.pauseAndResumeBtn.setStyleSheet(iconBtnStyle)
+            self.pauseAndResumeBtn.clicked.connect(self.pauseAndResume)
+            mainLayout.addWidget(self.pauseAndResumeBtn)
+
+            resetBtn = QPushButton()
+            refreshIcon = QIcon("icons/refresh.png")
+            resetBtn.setIcon(refreshIcon)
+            resetBtn.setIconSize(QSize(18, 18))
+            resetBtn.setStyleSheet(iconBtnStyle)
+            resetBtn.clicked.connect(self.resetTimer)
+            mainLayout.addWidget(resetBtn)
+
+        def updateUI(self):
+            if not self.timerPaused:
+                self.updateTimerLabel(self.timer.elapsed() - self.timeDelta)
+
+        def pauseAndResume(self):
+            if self.timerPaused:
+                self.beginTimer()
+                self.pauseAndResumeBtn.setIcon(QIcon("icons/pause.png"))
+            else:
+                self.pauseTimer()
+                self.pauseAndResumeBtn.setIcon(QIcon("icons/play.png"))
+
+        def beginTimer(self):
+            self.timeDelta = self.timer.elapsed() - self.timePausedTimestamp
+            self.timerPaused = False
+
+        def pauseTimer(self):
+            self.timePausedTimestamp = self.timer.elapsed() - self.timeDelta
+            self.timerPaused = True
+
+        def resetTimer(self):
+            if not self.timerPaused:
+                self.pauseAndResume()
+            self.timer.restart()
+            self.timeDelta = 0
+            self.timePausedTimestamp = 0
+            self.updateTimerLabel(self.timer.elapsed() - self.timeDelta)
+
+        def updateTimerLabel(self, value):
+            """
+            Vibecoded, I will probably have a j*b if I can write code this clean
+            Cool piece of code that updates the timer display while making leading 0s gray
+
+            Update self.timeLabel with a formatted time display.
+
+            Parameters:
+            - value: time in milliseconds (int)
+
+            Display format: 000.0
+            - Leading zeros in gray (#808080)
+            - Significant digits in white (#FFFFFF)
+            """
+            # Convert milliseconds to seconds with 1 decimal place
+            seconds = value / 1000
+            time_str = f"{seconds:05.1f}"  # 6 characters total, 1 decimal
+
+            # Separate leading zeros from significant digits
+            # Leading zeros are all zeros before the first non-zero character (ignoring the decimal point)
+            non_zero_index = next((i for i, c in enumerate(time_str.replace('.', '')) if c != '0'), len(time_str))
+
+            # Build HTML string
+            html_text = ""
+            for i, char in enumerate(time_str):
+                if i < non_zero_index:
+                    color = "#808080"  # gray for leading zeros
+                else:
+                    color = "#FFFFFF"  # white for significant digits
+                html_text += f'<span style="color:{color};">{char}</span>'
+
+            # Update the label
+            self.timerLabel.setText(html_text)
+
     def __init__(self, getCell1, getCell2, getCurrent, getVoltage, getThrottle):
         super().__init__()
 
@@ -136,6 +251,9 @@ class DataSave(QWidget):
         self.datasheet = nums.Datasheet(["Time", "Throttle", "Thrust", "Torque", "Voltage", "Current"])
 
         mainLayout = QVBoxLayout(self)
+
+        timerWidget = self.TimerWidget()
+        mainLayout.addWidget(timerWidget)
 
         self.model = self.PandasTable(self.datasheet.getDF())
         table = QTableView()
