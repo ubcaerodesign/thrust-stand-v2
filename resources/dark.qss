@@ -38,6 +38,17 @@ QComboBox::down-arrow {
     height: 12px;
 }
 
+QComboBox:disabled {
+    background-color: #2e2e2e;  /* Darker background */
+    color: #777;               /* Faded text color */
+    border: 1px solid #444;    /* Slightly dimmer border */
+}
+
+QComboBox:disabled::drop-down {
+    background-color: #333;    /* Muted button color */
+    border-left: 1px solid #444;
+}
+
 QComboBox QAbstractItemView {
     background-color: #2e2e2e;
     border: 1px solid #555;

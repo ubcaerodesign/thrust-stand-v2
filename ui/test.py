@@ -1,7 +1,9 @@
+import os
+
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QTimer, QSize, QElapsedTimer
 from PyQt5.QtGui import QPixmap, QIcon, QFont
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView, \
-    QHBoxLayout, QFileDialog, QSplitter, QLabel, QProgressBar, QSizePolicy
+    QHBoxLayout, QFileDialog, QSplitter, QLabel, QProgressBar, QSizePolicy, QComboBox
 
 import matplotlib
 
@@ -17,6 +19,8 @@ from collections import deque
 import board
 
 import nums
+
+import autoTest
 
 matplotlib.use('Qt5Agg')
 matplotlib.rcParams.update({
@@ -248,6 +252,48 @@ class DataSave(QWidget):
                 return None
             return returnValue
 
+    class AutoTestWidget(QWidget):
+        def __init__(self, addPoint):
+            super().__init__()
+
+            self.addPoint = addPoint
+
+            mainLayout = QHBoxLayout(self)
+
+            self.scriptSelector = QComboBox()
+            scriptEntries = os.listdir("scripts")
+            scripts = []
+            for entry in scriptEntries:
+                fullPath = os.path.join("scripts", entry)
+                if os.path.isfile(fullPath):
+                    scripts.append(entry)
+            self.scriptSelector.addItems(scripts)
+            mainLayout.addWidget(self.scriptSelector)
+
+            self.scriptBtn = QPushButton("Start")
+            self.scriptBtn.clicked.connect(self.startStopScript)
+            self.scriptBtn.setMaximumWidth(60)
+            mainLayout.addWidget(self.scriptBtn)
+
+        def startStopScript(self):
+            if autoTest.scriptRunning:
+                self.cancelScript()
+            else:
+                self.startScript()
+
+        @staticmethod
+        def cancelScript():
+            autoTest.cancelScript()
+
+        def startScript(self):
+            autoTest.runScript(os.path.join("scripts", self.scriptSelector.currentText()), self.addPoint, self.scriptComplete)
+            self.scriptBtn.setText("Cancel")
+            self.scriptSelector.setEnabled(False)
+
+        def scriptComplete(self):
+            self.scriptBtn.setText("Start")
+            self.scriptSelector.setEnabled(True)
+
     def __init__(self, getCell1, getCell2, getCurrent, getVoltage, getThrottle):
         super().__init__()
 
@@ -263,6 +309,9 @@ class DataSave(QWidget):
 
         self.timerWidget = self.TimerWidget()
         mainLayout.addWidget(self.timerWidget)
+
+        autoTestWidget = self.AutoTestWidget(self.addPoint)
+        mainLayout.addWidget(autoTestWidget)
 
         self.model = self.PandasTable(self.datasheet.getDF())
         table = QTableView()
@@ -283,9 +332,9 @@ class DataSave(QWidget):
 
         mainLayout.addLayout(controlsLayout)
 
-    def addPoint(self):
+    def addPoint(self, timer=None):
         dataPoint = {
-            "Time": self.timerWidget.getTimerValue(),
+            "Time": timer if timer is not None else self.timerWidget.getTimerValue(),
             "Throttle": self.getThrottle(),
             "Thrust": self.getCell1(),
             "Torque": self.getCell2(),

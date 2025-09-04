@@ -1,0 +1,27 @@
+start: statement+
+
+statement: set_throttle
+         | read_cell_1
+         | read_cell_2
+         | read_current
+         | read_voltage
+         | wait
+         | use_spreadsheet
+         | write_sheet_cell
+         | add_point
+
+set_throttle: "SET_THROTTLE" INT
+read_cell_1: "READ_CELL_1"
+read_cell_2: "READ_CELL_2"
+read_current: "READ_CURRENT"
+read_voltage: "READ_VOLTAGE"
+wait: "WAIT" INT
+use_spreadsheet: "USE_SPREADSHEET" INT
+write_sheet_cell: "WRITE_SHEET_CELL" INT INT INT
+add_point: "ADD_POINT"
+
+%import common.INT
+%import common.CNAME
+%import common.NUMBER
+%import common.WS
+%ignore WS
