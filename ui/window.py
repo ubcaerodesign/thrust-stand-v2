@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QVBoxLayout
 from .navbar import NavBar
 from .infobar import InfoBar
 from .connect import Connect
+from .settings import Settings
 from .test import Test
 from .board import Board
 
@@ -18,7 +19,8 @@ class MainWindow(QMainWindow):
         self.activeWindows = {
             "Connect": [True, Connect(infBar.setConnected, infBar.setDisconnected)],
             "Test": [False, Test()],
-            "Board": [False, Board()]
+            "Board": [False, Board()],
+            "Settings": [False, Settings()]
         }
 
         self.mainLayout = QVBoxLayout()
@@ -34,6 +36,7 @@ class MainWindow(QMainWindow):
         sidebar.testBtn.clicked.connect(self.test)
         sidebar.connectBtn.clicked.connect(self.connect)
         sidebar.boardBtn.clicked.connect(self.board)
+        sidebar.settingsBtn.clicked.connect(self.settings)
         self.horLayout.addWidget(sidebar)
 
         self.mainLayout.addWidget(infBar)
@@ -41,8 +44,10 @@ class MainWindow(QMainWindow):
         self.horLayout.addWidget(self.activeWindows["Connect"][1])
         self.horLayout.addWidget(self.activeWindows["Test"][1])
         self.horLayout.addWidget(self.activeWindows["Board"][1])
+        self.horLayout.addWidget(self.activeWindows["Settings"][1])
         self.activeWindows["Test"][1].hide()
         self.activeWindows["Board"][1].hide()
+        self.activeWindows["Settings"][1].hide()
 
         mainWidget = QWidget()
         mainWidget.setLayout(self.mainLayout)
@@ -56,6 +61,9 @@ class MainWindow(QMainWindow):
 
     def board(self):
         self.switchWindow("Board")
+
+    def settings(self):
+        self.switchWindow("Settings")
 
     def switchWindow(self, window):
         for w in self.activeWindows:

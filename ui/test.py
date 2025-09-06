@@ -314,14 +314,15 @@ class DataSave(QWidget):
         mainLayout.addWidget(autoTestWidget)
 
         self.model = self.PandasTable(self.datasheet.getDF())
-        table = QTableView()
-        table.setModel(self.model)
-        table.setMinimumWidth(300)
-        table.verticalHeader().setVisible(True)
-        table.verticalHeader().setMinimumWidth(32)
-        mainLayout.addWidget(table)
+        self.table = QTableView()
+        self.table.setModel(self.model)
+        self.table.setMinimumWidth(300)
+        self.table.verticalHeader().setVisible(True)
+        self.table.verticalHeader().setMinimumWidth(32)
+        mainLayout.addWidget(self.table)
 
         controlsLayout = QHBoxLayout()
+
         addDataButton = QPushButton("Save Point")
         addDataButton.clicked.connect(self.addPoint)
         controlsLayout.addWidget(addDataButton)
@@ -330,11 +331,15 @@ class DataSave(QWidget):
         exportButton.clicked.connect(self.exportData)
         controlsLayout.addWidget(exportButton)
 
+        clearButton = QPushButton("Clear Data")
+        clearButton.clicked.connect(self.clearData)
+        controlsLayout.addWidget(clearButton)
+
         mainLayout.addLayout(controlsLayout)
 
     def addPoint(self, timer=None):
         dataPoint = {
-            "Time": timer if timer is not None else self.timerWidget.getTimerValue(),
+            "Time": timer if timer is not None and timer != False else self.timerWidget.getTimerValue(),
             "Throttle": self.getThrottle(),
             "Thrust": self.getCell1(),
             "Torque": self.getCell2(),
@@ -353,6 +358,11 @@ class DataSave(QWidget):
         )
         if filePath:
             self.datasheet.export(filePath)
+
+    def clearData(self):
+        self.datasheet = nums.Datasheet(["Time", "Throttle", "Thrust", "Torque", "Voltage", "Current"])
+        self.model = self.PandasTable(self.datasheet.getDF())
+        self.table.setModel(self.model)
 
 
 class TimedBuffer:
