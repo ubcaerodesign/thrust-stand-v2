@@ -1,3 +1,5 @@
+import time
+
 from lark import Lark, Transformer
 
 import board
@@ -21,11 +23,14 @@ class Runner(Transformer):
         self.addPoint = addPoint
         self.abortFlag = False
         self.useRaw = False
+        self.scriptStart = time.time() * 1000
 
     def set_throttle(self, args):
         self.checkAbort()
         throttle, = args
-        print(f"Setting throttle {throttle}")
+        throttle = int(throttle)
+        if 0 <= throttle <= 100:
+            board.setThrottle(throttle)
 
     def read_cell_1(self, _):
         self.checkAbort()
@@ -54,7 +59,10 @@ class Runner(Transformer):
     def wait(self, args):
         self.checkAbort()
         milliseconds, = args
-        print(f"Waiting for throttle {milliseconds} milliseconds...")
+        milliseconds = int(milliseconds)
+        startTime = time.time() * 1000
+        while time.time() * 1000 < startTime + milliseconds:
+            self.checkAbort()
 
     def use_raw(self, args):
         self.checkAbort()
@@ -72,7 +80,7 @@ class Runner(Transformer):
 
     def add_point(self, _):
         self.checkAbort()
-        self.addPoint()
+        self.addPoint(int(time.time() * 1000 - self.scriptStart))
 
     def checkAbort(self):
         if self.abortFlag:
