@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QThread
+from lark.exceptions import VisitError
 
 from . import reader
 from .reference import RunnerThread
@@ -40,8 +41,11 @@ class RunnerThread(QThread):
         self.runner = reader.Runner(self.addPoint)
         try:
             self.runner.transform(tree)
-        except reader.AbortExecution:
-            pass
+        except VisitError as e:
+            if isinstance(e.__context__, reader.AbortExecution):
+                pass
+            else:
+                raise
         self.scriptComplete()
         scriptRunning = False
         self.running = False
