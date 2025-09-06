@@ -17,11 +17,11 @@ def startWindow():
     """
 
     # rescale ui for laptops
-    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
-        QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    """if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)"""
 
-    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
-        QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    """if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)"""
     app = QApplication(sys.argv + ['-platform', 'windows:darkmode=1'])
     sys.excepthook = excepthook
 

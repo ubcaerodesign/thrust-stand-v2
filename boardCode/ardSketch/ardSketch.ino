@@ -4,9 +4,13 @@
 #define SCK1 A3
 #define DOUT2 A4
 #define SCK2 A5
+#define THROTTLE 17
 
 #include "HX711.h"
 #include "wiring_private.h"
+#include <Servo.h>
+
+Servo throttlePwm;
 
 HX711 scale1;
 HX711 scale2;
@@ -31,6 +35,14 @@ bool cur = true;
 // cur: amps
 // note, all data sent over serial is not zeroed, simply a raw reading, the computer software does the calibration
 
+// note
+// the pin controlling the ESC is on a pin that is by default hard wired to a LED on the leonardo, to override this, go to arduino core and replace:
+// #define RXLED0			PORTB |= (1<<0)
+// #define RXLED1			PORTB &= ~(1<<0)
+// with this:
+// #define RXLED0 0
+// #define RXLED1 0
+
 void setup() {
   Serial.begin(9600);
 
@@ -43,6 +55,8 @@ void setup() {
   scale2.begin(DOUT2, SCK2);
   scale2.set_scale();
   scale2.tare();
+
+  throttlePwm.attach(THROTTLE);
 
   Serial.println("STARTED");
 }
@@ -137,7 +151,7 @@ void setThrottle(int thr) {
   Serial.print("Throttle set to ");
   Serial.print(thr);
   Serial.println("%");
-  // TODO: implement PWM controls and clean up serial communication
+  throttlePwm.writeMicroseconds(1000 + thr * 10);
 }
 
 void info() {

@@ -423,7 +423,7 @@ class TimedBuffer:
         return results
 
 
-class DataGraph(FigureCanvasQTAgg):
+"""class DataGraph(FigureCanvasQTAgg):
     def __init__(self, history=30):
         fig = Figure(constrained_layout=True)
         self.axes = fig.add_subplot(111)
@@ -459,8 +459,8 @@ class DataGraph(FigureCanvasQTAgg):
 
 class AutoUpdateGraph(DataGraph):
     """
-    Data transmitted by the signal has to be of a number
-    """
+#    Data transmitted by the signal has to be of a number
+"""
 
     def __init__(self, signal):
         super().__init__()
@@ -482,4 +482,75 @@ class AutoUpdateGraph(DataGraph):
         self.updateGraph()
 
     def getLastValue(self):
-        return self.data.get_values()[-1] if self.data.get_values() else None
+        return self.data.get_values()[-1] if self.data.get_values() else None"""
+
+# chatgpt optimizations, revisit this and clean up code
+class DataGraph(FigureCanvasQTAgg):
+    def __init__(self, history=30):
+        fig = Figure(constrained_layout=True)
+        self.axes = fig.add_subplot(111)
+        self.axes.set_xlim(history, 0)
+        self.axes.set_xlabel("time (s)")
+        self._xaxis_line = self.axes.axhline(0, color="#888", linewidth=1, zorder=1)
+        super().__init__(fig)
+
+    def updateGraph(self):
+        # Only rescale Y when necessary
+        self.axes.relim()
+        self.axes.autoscale_view(scaley=True)
+
+        ymin, ymax = self.axes.get_ylim()
+        self.axes.set_ylim(bottom=min(-1, ymin), top=max(1, ymax))
+
+        # Update x-axis line without recreating it
+        self._xaxis_line.set_xdata(self.axes.get_xlim())
+
+        # Much lighter than self.draw()
+        self.draw_idle()
+
+    def changeTimeFrame(self, start, end):
+        self.axes.set_xlim(end, start)
+
+    def setTitle(self, title):
+        self.axes.set_title(title)
+
+    def setXAxisTitle(self, title):
+        self.axes.set_xlabel(title)
+
+    def setYAxisTitle(self, title):
+        self.axes.set_ylabel(title)
+
+
+class AutoUpdateGraph(DataGraph):
+    def __init__(self, signal, history=30):
+        super().__init__(history=history)
+        self.data = TimedBuffer(180)
+        self._plotRef, = self.axes.plot([], [], lw=1.5)  # Pre-create line for efficiency
+        self._history = history
+        signal.connect(self.updateData)
+
+    def updateData(self, data):
+        self.data.add(data)
+
+        # Get only the most recent data within the window
+        items = self.data.get_items_by_age(0, self._history)
+        if not items:
+            return
+
+        # Unpack just once for efficiency
+        timestamps, ydata = zip(*items)
+        now = time.time()
+
+        # Convert timestamps into relative x-values in one pass
+        xdata = [now - t for t in timestamps]
+
+        # Directly update existing line, don't recreate
+        self._plotRef.set_data(xdata, ydata)
+
+        # Avoid unnecessary redraws
+        self.updateGraph()
+
+    def getLastValue(self):
+        values = self.data.get_values()
+        return values[-1] if values else None
+
