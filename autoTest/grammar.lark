@@ -7,6 +7,7 @@ statement: set_throttle
          | read_voltage
          | wait
          | use_spreadsheet
+         | use_raw
          | write_sheet_cell
          | add_point
 
@@ -16,9 +17,12 @@ read_cell_2: "READ_CELL_2"
 read_current: "READ_CURRENT"
 read_voltage: "READ_VOLTAGE"
 wait: "WAIT" INT
-use_spreadsheet: "USE_SPREADSHEET" INT
+use_spreadsheet: "USE_SPREADSHEET" BOOLEAN
+use_raw: "USE_RAW" BOOLEAN
 write_sheet_cell: "WRITE_SHEET_CELL" INT INT INT
 add_point: "ADD_POINT"
+
+BOOLEAN: /(?i)TRUE|FALSE/
 
 %import common.INT
 %import common.CNAME

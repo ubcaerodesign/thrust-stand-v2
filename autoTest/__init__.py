@@ -12,7 +12,7 @@ def runScript(script, addPoint, scriptComplete):
 
     scriptRunning = True
 
-    runnerThread = RunnerThread(script, scriptComplete)
+    runnerThread = RunnerThread(script, scriptComplete, addPoint)
     runnerThread.start()
 
 def cancelScript():
@@ -22,11 +22,12 @@ def cancelScript():
     runnerThread.stop()
 
 class RunnerThread(QThread):
-    def __init__(self, script, scriptComplete):
+    def __init__(self, script, scriptComplete, addPoint):
         QThread.__init__(self)
 
         self.script = script
         self.scriptComplete = scriptComplete
+        self.addPoint = addPoint
         self.runner = None
 
         self.running = False
@@ -36,7 +37,7 @@ class RunnerThread(QThread):
 
         self.running = True
         tree = reader.parse(self.script)
-        self.runner = reader.Runner()
+        self.runner = reader.Runner(self.addPoint)
         try:
             self.runner.transform(tree)
         except reader.AbortExecution:
