@@ -1,17 +1,20 @@
-"""def setAll(enable: bool):
-    setLc1(enable)
-    setLc2(enable)
-    setVtg(enable)
-    setCur(enable)
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
 
-def setLc1(enable: bool):
-    config.ser.write(f"lc1({1 if enable else 0})\n)")
+class SerialWorker(QObject):
+    sendCommandSignal = pyqtSignal(str)  # new throttle value
 
-def setLc2(enable: bool):
-    config.ser.write(f"lc2({1 if enable else 0})\n)")
+    def __init__(self, serialPort):
+        super().__init__()
+        self.serialPort = serialPort
+        self.sendCommandSignal.connect(self.writeThrottle)
 
-def setVtg(enable: bool):
-    config.ser.write(f"vtg({1 if enable else 0})\n)")
-
-def setCur(enable: bool):
-    config.ser.write(f"cur({1 if enable else 0})\n)")"""
+    @pyqtSlot(str)
+    def writeThrottle(self, msg):
+        if self.serialPort and self.serialPort.is_open:
+            try:
+                self.serialPort.write((msg + "\n").encode('utf-8'))
+                return True
+            except Exception:
+                return False
+        else:
+            return False

@@ -2,7 +2,10 @@ import serial
 
 from typing import Optional
 
+from PyQt5.QtCore import QThread
+
 from . import read
+from . import command
 
 """
 offsetDict: mutable offset dictionary
@@ -14,6 +17,8 @@ reader must be a QObject class in order to be compatible with the PyQt library
 COMPort = "COM0"
 
 ser: Optional[serial.Serial] = None
+serialWorker = None
+serialThread: Optional[QThread] = None
 
 offsetDict = {
     "cell1": 0,
@@ -31,8 +36,15 @@ voltageReceived = reader.voltageReceived
 
 def connect(port: str, baudrate: int = 9600):
     global ser
+    global serialWorker
+    global serialThread
     try:
         ser = serial.Serial(port, baudrate, timeout=1)
+
+        serialThread = QThread()
+        serialWorker = command.SerialWorker(ser)
+        serialWorker.moveToThread(serialThread)
+        serialThread.start()
         return True
     except serial.SerialException:
         # handle error (port unavailable, etc.)
@@ -77,11 +89,4 @@ def setThrottle(throttle: int):
     sendCommand(f"thr({throttle})")
 
 def sendCommand(command: str):
-    if ser and ser.is_open:
-        try:
-            ser.write((command + "\n").encode('utf-8'))
-            return True
-        except Exception:
-            return False
-    else:
-        return False
+    serialWorker.sendCommandSignal.emit(command)

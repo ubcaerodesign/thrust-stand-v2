@@ -442,7 +442,7 @@ class DataGraph(FigureCanvasQTAgg):
         # Update x-axis line to span current x-limits
         xlim = self.axes.get_xlim()
         self._xaxis_line.set_xdata(xlim)
-        self.draw()
+        self.draw_idle()
 
     def changeTimeFrame(self, start, end):
         self.axes.set_xlim(end, start)
