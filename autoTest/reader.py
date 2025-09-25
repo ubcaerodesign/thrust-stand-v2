@@ -1,4 +1,5 @@
 import time
+import threading
 
 from lark import Lark, Transformer
 
@@ -24,6 +25,7 @@ class Runner(Transformer):
         self.abortFlag = False
         self.useRaw = False
         self.scriptStart = time.time() * 1000
+        self.timer = threading.Event()
 
     def set_throttle(self, args):
         self.checkAbort()
@@ -60,9 +62,7 @@ class Runner(Transformer):
         self.checkAbort()
         milliseconds, = args
         milliseconds = int(milliseconds)
-        startTime = time.time() * 1000
-        while time.time() * 1000 < startTime + milliseconds:
-            self.checkAbort()
+        self.timer.wait(timeout=(milliseconds / 1000))
 
     def use_raw(self, args):
         self.checkAbort()

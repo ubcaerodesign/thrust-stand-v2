@@ -52,4 +52,5 @@ class RunnerThread(QThread):
 
     def stop(self):
         self.runner.abortFlag = True
+        self.runner.timer.set()
         self.running = False
