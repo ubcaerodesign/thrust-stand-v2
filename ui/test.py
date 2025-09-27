@@ -18,6 +18,8 @@ from collections import deque
 
 import board
 
+from .themeManager import themeManager
+
 import nums
 
 import autoTest
@@ -50,10 +52,9 @@ class Test(QFrame):
     def __init__(self):
         super().__init__()
 
-        # set stylesheet
-        qss = "resources/dark.qss"
-        with open(qss, "r") as f:
-            self.setStyleSheet(f.read())
+        # setup stylesheet
+        self.setStyleSheet(themeManager.getThemeStylesheet())
+        themeManager.themeChanged.connect(self.setTheme)
 
         mainLayout = QVBoxLayout(self)
         splitter = QSplitter(Qt.Horizontal)
@@ -93,6 +94,9 @@ class Test(QFrame):
 
         dataSave = DataSave(graph1.getLastValue, graph2.getLastValue, graph3.getLastValue, graph4.getLastValue, throttleSlider.value)
         splitter.addWidget(dataSave)
+
+    def setTheme(self, stylesheet):
+        self.setStyleSheet(stylesheet)
 
 
 class DataSave(QWidget):

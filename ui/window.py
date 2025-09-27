@@ -6,6 +6,7 @@ from .connect import Connect
 from .settings import Settings
 from .test import Test
 from .board import Board
+from .themeManager import themeManager
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -13,6 +14,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("AeroThrust")
         self.setMinimumSize(1100, 600)
         self.resize(1100, 600)
+
+        # activate themes
+        qss = "resources/dark.qss"
+        with open(qss, "r") as f:
+            stylesheet = f.read()
+            themeManager.setTheme("dark", stylesheet)
 
         infBar = InfoBar()
 

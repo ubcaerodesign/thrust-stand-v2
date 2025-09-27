@@ -9,16 +9,17 @@ from serial import SerialException
 
 import board
 
+from .themeManager import themeManager
+
 
 class Connect(QFrame):
     # TODO: it is possible to connect to the same serial port multiple times resulting in incomprehensible data
     def __init__(self, setConnected, setDisconnected):
         super().__init__()
 
-        # set stylesheet
-        qss = "resources/dark.qss"
-        with open(qss, "r") as f:
-            self.setStyleSheet(f.read())
+        # setup stylesheet
+        self.setStyleSheet(themeManager.getThemeStylesheet())
+        themeManager.themeChanged.connect(self.setTheme)
 
         iconBtnQss = "resources/iconBtn.qss"
         iconBtnStyle = None
@@ -71,6 +72,9 @@ class Connect(QFrame):
 
         topLayout.setContentsMargins(5, 0, 0, 0)
         mainLayout.setContentsMargins(10, 15, 10, 10)
+
+    def setTheme(self, stylesheet):
+        self.setStyleSheet(stylesheet)
 
     def suppressToggle(self, checked):
         if checked:

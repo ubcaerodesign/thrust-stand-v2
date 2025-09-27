@@ -4,21 +4,25 @@ from PyQt5.QtWidgets import QFrame, QWidget, QHBoxLayout, QVBoxLayout, QPushButt
 
 import board
 
+from .themeManager import themeManager
+
 
 class Board(QFrame):
     def __init__(self):
         super().__init__()
 
-        # set stylesheet
-        qss = "resources/dark.qss"
-        with open(qss, "r") as f:
-            self.setStyleSheet(f.read())
+        # setup stylesheet
+        self.setStyleSheet(themeManager.getThemeStylesheet())
+        themeManager.themeChanged.connect(self.setTheme)
 
         # split window into calibration part and board status part
         mainLayout = QHBoxLayout(self)
 
         calibrationWidget = CalibrationWidget()
         mainLayout.addWidget(calibrationWidget)
+
+    def setTheme(self, stylesheet):
+        self.setStyleSheet(stylesheet)
 
 
 class CalibrationWidget(QWidget):

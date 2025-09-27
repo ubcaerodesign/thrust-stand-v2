@@ -1,0 +1,302 @@
+QFrame {
+    background-color: #f5f5f5;
+}
+
+QLabel {
+    color: #222;
+    font-size: 10pt;
+    font-family: "Roboto";
+}
+
+QLabel#large {
+    color: #222;
+    font-size: 20pt;
+    font-family: "Roboto";
+}
+
+QComboBox {
+    background-color: #ffffff;
+    color: #222;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    min-width: 50px;
+    font-size: 10pt;
+    font-family: "Roboto";
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #aaa;
+    background-color: #e6e6e6;
+}
+
+QComboBox::down-arrow {
+    image: url(icons/down-triangle.png);
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox:disabled {
+    background-color: #f0f0f0;
+    color: #999;
+    border: 1px solid #ccc;
+}
+
+QComboBox:disabled::drop-down {
+    background-color: #e0e0e0;
+    border-left: 1px solid #ccc;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    border: 1px solid #bbb;
+    selection-background-color: #d0e7ff;
+    selection-color: #000;
+    color: #222;
+    padding: 2px;
+    outline: 0;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 4px 8px;
+    color: #007700;
+}
+QComboBox QAbstractItemView::item:selected {
+    background-color: #3d6fb4;
+    color: #fff;
+}
+QComboBox QAbstractItemView::item:hover {
+    background-color: #e6e6e6;
+}
+
+QPlainTextEdit#console {
+    background-color:  #ffffff;
+    color:             #111;
+    font-family:       "Consolas", "Courier New", monospace;
+    font-size:         10pt;
+    border:            1px solid #bbb;
+    border-radius:     4px;
+    padding:           6px;
+}
+
+QPlainTextEdit {
+    background-color:  #ffffff;
+    color:             #111;
+    font-family:       "Consolas", "Courier New", monospace;
+    font-size:         10pt;
+    border:            1px solid #bbb;
+    border-radius:     4px;
+    padding:           0px;
+}
+
+/* scrollbars */
+QScrollBar:vertical {
+    background:        #f0f0f0;
+    width:             10px;
+    margin:            0px;
+    border-radius:     5px;
+}
+
+QScrollBar::handle:vertical {
+    background:        #cccccc;
+    min-height:        20px;
+    border-radius:     5px;
+}
+QScrollBar::handle:vertical:hover {
+    background:        #bbbbbb;
+}
+QScrollBar::handle:vertical:pressed {
+    background:        #999999;
+}
+
+QScrollBar::sub-line:vertical,
+QScrollBar::add-line:vertical {
+    background:        none;
+    height:            0px;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-page:vertical,
+QScrollBar::add-page:vertical {
+    background:        none;
+}
+
+QScrollBar:horizontal {
+    background:        #f0f0f0;
+    height:            10px;
+    margin:            0px;
+    border-radius:     5px;
+}
+
+QScrollBar::handle:horizontal {
+    background:        #cccccc;
+    min-height:        20px;
+    border-radius:     5px;
+}
+QScrollBar::handle:horizontal:hover {
+    background:        #bbbbbb;
+}
+QScrollBar::handle:horizontal:pressed {
+    background:        #999999;
+}
+
+QScrollBar::sub-line:horizontal,
+QScrollBar::add-line:horizontal {
+    background:        none;
+    height:            0px;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-page:horizontal,
+QScrollBar::add-page:horizontal {
+    background:        none;
+}
+/* scrollbars */
+
+QPushButton {
+    color: #222;
+    background: #e6e6e6;
+    text-align: center;
+    font-size: 10pt;
+    font-family: "Roboto";
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QPushButton:hover {
+    background: #d0d0d0;
+}
+
+QPushButton#greenBtn {
+    color: #fff;
+    background: #4da77a;
+    text-align: center;
+    font-size: 10pt;
+    font-family: "Roboto";
+    border: 1px solid #3a7f5c;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QFrame#panel {
+    background-color: #ffffff;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+QLineEdit {
+    background-color:  #ffffff;
+    color:             #111;
+    font-family:       "Consolas", "Courier New", monospace;
+    font-size:         10pt;
+    border:            1px solid #bbb;
+    border-radius:     4px;
+    padding:           6px;
+}
+
+/* Table view */
+QTableView {
+    background-color: #ffffff;
+    color: #111;
+    gridline-color: #ccc;
+    selection-background-color: #3d6fb4;
+    selection-color: #ffffff;
+    border: 1px solid #bbb;
+    border-radius:     4px;
+    font-size: 14px;
+    outline: 0;
+}
+
+QHeaderView::section {
+    background-color: #e6e6e6;
+    color: #111;
+    padding: 4px;
+    border: 1px solid #ccc;
+    font-weight: bold;
+}
+
+QHeaderView {
+    background-color: #f5f5f5;
+}
+
+QTableCornerButton::section {
+    background-color: #e6e6e6;
+    border: 1px solid #ccc;
+}
+/* Table view */
+
+/* Checkbox */
+QCheckBox {
+    color: #222;
+    font-size: 14px;
+}
+
+QCheckBox::indicator {
+    width: 14px;
+    height: 14px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid #999;
+    background-color: #ffffff;
+    border-radius: 4px;
+}
+
+QCheckBox::indicator:unchecked:hover {
+    border: 2px solid #777;
+    background-color: #e6e6e6;
+}
+
+QCheckBox::indicator:checked {
+    border: 2px solid #4da77a;
+    background-color: #4da77a;
+    border-radius: 4px;
+    image: url(:/icons/checkmark_black.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    border: 2px solid #3a7f5c;
+    background-color: #3a7f5c;
+}
+/* Checkbox */
+
+/* QSplitter */
+QSplitter {
+    background-color: #f5f5f5;
+    border: none;
+    padding: 0;
+}
+
+QSplitter::handle {
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+}
+
+QSplitter::handle:horizontal {
+    height: 6px;
+    margin: 0 2px;
+}
+
+QSplitter::handle:vertical {
+    width: 6px;
+    margin: 2px 0;
+}
+
+QSplitter::handle:hover {
+    background-color: #d0d0d0;
+    border: 1px solid #bbb;
+}
+
+QSplitter::handle:pressed {
+    background-color: #b0b0b0;
+    border: 1px solid #999;
+}
+/* QSplitter */
+
+/* QSlider */
+QSlider {
+    background-color: transparent;
+    padding: 6px;
+}
+/* QSlider */
