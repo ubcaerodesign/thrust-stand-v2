@@ -3,7 +3,7 @@ import re
 from PyQt5.QtCore import pyqtSignal, QObject
 
 
-def _parse_long_or_none(line):
+def parseLong(line):
     """
     Parses long integer or 'n' from a line like 'lc1(1234)', 'lc1(-49)' or 'lc1(n)'
     """
@@ -14,7 +14,7 @@ def _parse_long_or_none(line):
     return None
 
 
-def _parse_float(line):
+def parseFloat(line):
     """
     Parses float value from a line like 'cur(3.45)'
     """
@@ -50,19 +50,19 @@ class SerialReader(QObject):
         - vtg(<float>)
         """
         if line.startswith("lc1("):
-            self.cell1 = _parse_long_or_none(line)
+            self.cell1 = parseLong(line)
             if self.cell1 is not None:
                 self.cell1Received.emit(self.cell1 - self.offsetDict["cell1"])
         elif line.startswith("lc2("):
-            self.cell2 = _parse_long_or_none(line)
+            self.cell2 = parseLong(line)
             if self.cell2 is not None:
                 self.cell2Received.emit(self.cell2 - self.offsetDict["cell2"])
         elif line.startswith("cur("):
-            self.current = _parse_float(line)
+            self.current = parseFloat(line)
             if self.current is not None:
                 self.currentReceived.emit(round(self.current - self.offsetDict["current"], 2))
         elif line.startswith("vtg("):
-            self.voltage = _parse_float(line)
+            self.voltage = parseFloat(line)
             if self.voltage is not None:
                 self.voltageReceived.emit(round(self.voltage - self.offsetDict["voltage"], 2))
 

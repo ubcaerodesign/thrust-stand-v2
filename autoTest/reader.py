@@ -38,25 +38,25 @@ class Runner(Transformer):
         self.checkAbort()
         if self.useRaw:
             return board.reader.cell1
-        return board.reader.cell1 - board.offsetDict["cell1"]
+        return board.cell1
 
     def read_cell_2(self, _):
         self.checkAbort()
         if self.useRaw:
             return board.reader.cell2
-        return board.reader.cell2 - board.offsetDict["cell2"]
+        return board.cell2
 
     def read_current(self, _):
         self.checkAbort()
         if self.useRaw:
             return board.reader.current
-        return board.reader.current - board.offsetDict["current"]
+        return board.current
 
     def read_voltage(self, _):
         self.checkAbort()
         if self.useRaw:
             return board.reader.voltage
-        return board.reader.voltage - board.offsetDict["voltage"]
+        return board.voltage
 
     def wait(self, args):
         self.checkAbort()

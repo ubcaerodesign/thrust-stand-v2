@@ -17,7 +17,7 @@ reader must be a QObject class in order to be compatible with the PyQt library
 COMPort = "COM0"
 
 ser: Optional[serial.Serial] = None
-serialWorker = None
+serialWorker: Optional[command.SerialWorker] = None
 serialThread: Optional[QThread] = None
 
 offsetDict = {
@@ -27,12 +27,18 @@ offsetDict = {
     "voltage": 0
 }
 
+# initializes the reader and exposes its signals
 reader = read.SerialReader(offsetDict)
 
 cell1Received = reader.cell1Received
 cell2Received = reader.cell2Received
 currentReceived = reader.currentReceived
 voltageReceived = reader.voltageReceived
+
+cell1 = 0
+cell2 = 0
+current = 0
+voltage = 0
 
 def connect(port: str, baudrate: int = 9600):
     global ser
@@ -88,5 +94,27 @@ def setThrottle(throttle: int):
         raise ValueError("throttle must be between 0 and 100")
     sendCommand(f"thr({throttle})")
 
-def sendCommand(command: str):
-    serialWorker.sendCommandSignal.emit(command)
+def sendCommand(msg: str):
+    serialWorker.sendCommandSignal.emit(msg)
+
+# updates the value stored whenever a new value arrives
+def updateCell1(val):
+    global cell1
+    cell1 = val
+
+def updateCell2(val):
+    global cell2
+    cell2 = val
+
+def updateCurrent(val):
+    global current
+    current = val
+
+def updateVoltage(val):
+    global voltage
+    voltage = val
+
+cell1Received.connect(updateCell1)
+cell2Received.connect(updateCell2)
+currentReceived.connect(updateCurrent)
+voltageReceived.connect(updateVoltage)
