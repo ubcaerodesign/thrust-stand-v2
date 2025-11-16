@@ -57,6 +57,7 @@ void setup() {
   scale2.tare();
 
   throttlePwm.attach(THROTTLE);
+  setThrottle(0);
 
   Serial.println("STARTED");
 }
@@ -151,7 +152,7 @@ void setThrottle(int thr) {
   Serial.print("Throttle set to ");
   Serial.print(thr);
   Serial.println("%");
-  throttlePwm.writeMicroseconds(1000 + thr * 10);
+  throttlePwm.writeMicroseconds(1450 + thr * 10);
 }
 
 void info() {

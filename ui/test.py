@@ -427,7 +427,7 @@ class TimedBuffer:
         return results
 
 
-"""class DataGraph(FigureCanvasQTAgg):
+class DataGraph(FigureCanvasQTAgg):
     def __init__(self, history=30):
         fig = Figure(constrained_layout=True)
         self.axes = fig.add_subplot(111)
@@ -486,10 +486,10 @@ class AutoUpdateGraph(DataGraph):
         self.updateGraph()
 
     def getLastValue(self):
-        return self.data.get_values()[-1] if self.data.get_values() else None"""
+        return self.data.get_values()[-1] if self.data.get_values() else None
 
 # chatgpt optimizations, revisit this and clean up code
-class DataGraph(FigureCanvasQTAgg):
+"""class DataGraph(FigureCanvasQTAgg):
     def __init__(self, history=30):
         fig = Figure(constrained_layout=True)
         self.axes = fig.add_subplot(111)
@@ -556,5 +556,5 @@ class AutoUpdateGraph(DataGraph):
 
     def getLastValue(self):
         values = self.data.get_values()
-        return values[-1] if values else None
+        return values[-1] if values else None"""
 
