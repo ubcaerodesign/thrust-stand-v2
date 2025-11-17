@@ -1,14 +1,12 @@
 import os
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QTimer, QSize, QElapsedTimer
+import numpy as np
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QTimer, QSize, QElapsedTimer, pyqtSlot
 from PyQt5.QtGui import QPixmap, QIcon, QFont
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QPushButton, QWidget, QSlider, QTableWidget, QTableView, \
     QHBoxLayout, QFileDialog, QSplitter, QLabel, QProgressBar, QSizePolicy, QComboBox
 
-import matplotlib
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
+import pyqtgraph as pg
 
 import pandas as pd
 
@@ -23,29 +21,6 @@ from .themeManager import themeManager
 import nums
 
 import autoTest
-
-matplotlib.use('Qt5Agg')
-matplotlib.rcParams.update({
-    # Figure backgrounds
-    "figure.facecolor":   "#1e1e1e",
-    "figure.edgecolor":   "#2e2e2e",
-
-    # Axes backgrounds
-    "axes.facecolor":     "#2a2a2a",
-    "axes.edgecolor":     "#ffffff",
-
-    # Text colors
-    "text.color":         "#ffffff",
-    "axes.labelcolor":    "#dddddd",
-    "axes.titleweight":   "bold",
-
-    # Tick colors
-    "xtick.color":        "#bbbbbb",
-    "ytick.color":        "#bbbbbb",
-
-    # Grid lines (if you use them)
-    "grid.color":         "#444444",
-})
 
 
 class Test(QFrame):
@@ -66,18 +41,22 @@ class Test(QFrame):
         monitorWidget.setMinimumSize(500, 0)
         splitter.addWidget(monitorWidget)
 
-        graph1 = AutoUpdateGraph(board.cell1Received)
-        graph1.setTitle("Thrust")
-        graph1.setYAxisTitle("(g)")
-        graph2 = AutoUpdateGraph(board.cell2Received)
-        graph2.setTitle("Torque")
-        graph2.setYAxisTitle("(Nm)")
-        graph3 = AutoUpdateGraph(board.voltageReceived)
-        graph3.setTitle("Voltage")
-        graph3.setYAxisTitle("(V)")
-        graph4 = AutoUpdateGraph(board.currentReceived)
-        graph4.setTitle("Current")
-        graph4.setYAxisTitle("(A)")
+        graph1 = AutoUpdateGraph()
+        graph1.setYAxisTitle("Thrust (g)")
+        graph1.setXAxisTitle("Samples")
+        board.cell1Received.connect(graph1.addPointInt)
+        graph2 = AutoUpdateGraph()
+        graph2.setYAxisTitle("Torque (Nm)")
+        graph2.setXAxisTitle("Samples")
+        board.cell2Received.connect(graph2.addPointInt)
+        graph3 = AutoUpdateGraph()
+        graph3.setYAxisTitle("Voltage (V)")
+        graph3.setXAxisTitle("Samples")
+        board.voltageReceived.connect(graph3.addPointFloat)
+        graph4 = AutoUpdateGraph()
+        graph4.setYAxisTitle("Current (A)")
+        graph4.setXAxisTitle("Samples")
+        board.currentReceived.connect(graph4.addPointFloat)
         monitorLayout.addWidget(graph1, 0, 0)
         monitorLayout.addWidget(graph2, 0, 1)
         monitorLayout.addWidget(graph3, 1, 0)
@@ -87,13 +66,20 @@ class Test(QFrame):
         throttleSlider.setMinimum(0)
         throttleSlider.setMaximum(100)
         throttleSlider.setValue(0)
-        throttleSlider.valueChanged.connect(board.setThrottle)
         throttleSlider.setTickPosition(QSlider.TicksBelow)
         throttleSlider.setTickInterval(10)
+        throttleSlider.valueChanged.connect(board.setThrottle)
+        throttleSlider.valueChanged.connect(self.updateThrottleValue)
         monitorLayout.addWidget(throttleSlider, 3, 0, 1, 2)
 
-        dataSave = DataSave(graph1.getLastValue, graph2.getLastValue, graph3.getLastValue, graph4.getLastValue, throttleSlider.value)
+        self.currentStateData = {
+            "Throttle": 0
+        }
+        dataSave = DataSave(self.currentStateData)
         splitter.addWidget(dataSave)
+
+    def updateThrottleValue(self, value):
+        self.currentStateData["Throttle"] = value
 
     def setTheme(self, stylesheet):
         self.setStyleSheet(stylesheet)
@@ -298,14 +284,10 @@ class DataSave(QWidget):
             self.scriptBtn.setText("Start")
             self.scriptSelector.setEnabled(True)
 
-    def __init__(self, getCell1, getCell2, getCurrent, getVoltage, getThrottle):
+    def __init__(self, dataDict):
         super().__init__()
 
-        self.getCell1 = getCell1
-        self.getCell2 = getCell2
-        self.getCurrent = getCurrent
-        self.getVoltage = getVoltage
-        self.getThrottle = getThrottle
+        self.dataDict = dataDict
 
         self.datasheet = nums.Datasheet(["Time", "Throttle", "Thrust", "Torque", "Voltage", "Current"])
 
@@ -331,6 +313,13 @@ class DataSave(QWidget):
         addDataButton.clicked.connect(self.addPoint)
         controlsLayout.addWidget(addDataButton)
 
+        self.recordDataButton = QPushButton("Record Data")
+        self.recordDataButton.clicked.connect(self.recordData)
+        self.recording = False
+        controlsLayout.addWidget(self.recordDataButton)
+        self.recordTimer = QTimer()
+        self.recordTimer.timeout.connect(self.addPoint)
+
         exportButton = QPushButton("Export Data")
         exportButton.clicked.connect(self.exportData)
         controlsLayout.addWidget(exportButton)
@@ -341,14 +330,24 @@ class DataSave(QWidget):
 
         mainLayout.addLayout(controlsLayout)
 
-    def addPoint(self, timer=None):
+    def recordData(self):
+        if self.recording:
+            self.recording = False
+            self.recordDataButton.setText("Record Data")
+            self.recordTimer.stop()
+        else:
+            self.recording = True
+            self.recordDataButton.setText("Stop Recording")
+            self.recordTimer.start(250)
+
+    def addPoint(self, timer=None, throttle=None):
         dataPoint = {
             "Time": timer if timer is not None and timer != False else self.timerWidget.getTimerValue(),
-            "Throttle": self.getThrottle(),
-            "Thrust": self.getCell1(),
-            "Torque": self.getCell2(),
-            "Voltage": self.getVoltage(),
-            "Current": self.getCurrent()
+            "Throttle": throttle if throttle is not None else self.dataDict["Throttle"],
+            "Thrust": board.cell1,
+            "Torque": board.cell2,
+            "Voltage": board.voltage,
+            "Current": board.current
         }
         self.datasheet.addPoint(dataPoint)
         self.model.appendRow(dataPoint)
@@ -427,134 +426,58 @@ class TimedBuffer:
         return results
 
 
-class DataGraph(FigureCanvasQTAgg):
-    def __init__(self, history=30):
-        fig = Figure(constrained_layout=True)
-        self.axes = fig.add_subplot(111)
-        self.axes.set_xlim(history, 0)
-        self.axes.set_xlabel("time (s)")
-        # Add a fixed grey x-axis line at y=0
-        self._xaxis_line = self.axes.axhline(0, color="#888", linewidth=1, zorder=1)
-        super().__init__(fig)
+class SignalTimedBuffer(TimedBuffer):
+    def __init__(self, max_age_secs: float, signal):
+        super().__init__(max_age_secs)
+        signal.connect(self.newData)
 
-    def updateGraph(self):
-        self.axes.relim()
-        self.axes.autoscale(axis='y')
-        ymin, ymax = self.axes.get_ylim()
-        # Always include y=0 in the visible range
-        self.axes.set_ylim(bottom=min(-1, ymin), top=max(1, ymax))
-        # Update x-axis line to span current x-limits
-        xlim = self.axes.get_xlim()
-        self._xaxis_line.set_xdata(xlim)
-        self.draw_idle()
-
-    def changeTimeFrame(self, start, end):
-        self.axes.set_xlim(end, start)
-
-    def setTitle(self, title):
-        self.axes.set_title(title)
-
-    def setXAxisTitle(self, title):
-        self.axes.set_xlabel(title)
-
-    def setYAxisTitle(self, title):
-        self.axes.set_ylabel(title)
+    def newData(self, data):
+        self.add(data)
 
 
-class AutoUpdateGraph(DataGraph):
+class AutoUpdateGraph(QWidget):
     """
-#    Data transmitted by the signal has to be of a number
-"""
-
-    def __init__(self, signal):
+    Uses a circular buffer to keep track of the incoming data
+    """
+    def __init__(self, buffer_size=200):
         super().__init__()
-        self.data = TimedBuffer(180)
-        self._plotRef = None
-        signal.connect(self.updateData)
 
-    def updateData(self, data):
-        self.data.add(data)
-        xdata, ydata = zip(*self.data.get_items_by_age(0, 30))
-        now = time.time()
-        xdata = [now - x for x in xdata]
-        if self._plotRef is not None:
-            self._plotRef.set_xdata(xdata)
-            self._plotRef.set_ydata(ydata)
-        else:
-            self._plotRef = self.axes.plot(xdata, ydata)[0]
+        # plotting buffer
+        self.buffer_size = buffer_size
+        self.data = np.zeros(self.buffer_size)
+        self.ptr = 0
 
-        self.updateGraph()
+        # setup layout + plot
+        layout = QVBoxLayout(self)
+        self.plot_widget = pg.PlotWidget()
+        layout.addWidget(self.plot_widget)
+        self.curve = self.plot_widget.plot(self.data)
 
-    def getLastValue(self):
-        return self.data.get_values()[-1] if self.data.get_values() else None
+        # styling
+        self.plot_widget.showGrid(x=True, y=True)
+        self.plot_widget.setLabel('left', 'y')
+        self.plot_widget.setLabel('bottom', 'x')
+        self.plot_widget.setBackground('#1e1e1e')
 
-# chatgpt optimizations, revisit this and clean up code
-"""class DataGraph(FigureCanvasQTAgg):
-    def __init__(self, history=30):
-        fig = Figure(constrained_layout=True)
-        self.axes = fig.add_subplot(111)
-        self.axes.set_xlim(history, 0)
-        self.axes.set_xlabel("time (s)")
-        self._xaxis_line = self.axes.axhline(0, color="#888", linewidth=1, zorder=1)
-        super().__init__(fig)
+    @pyqtSlot(int)
+    def addPointInt(self, value):
+        self.data[self.ptr] = value
+        self.ptr = (self.ptr + 1) % self.buffer_size
+        self.curve.setData(np.roll(self.data, -self.ptr))
 
-    def updateGraph(self):
-        # Only rescale Y when necessary
-        self.axes.relim()
-        self.axes.autoscale_view(scaley=True)
-
-        ymin, ymax = self.axes.get_ylim()
-        self.axes.set_ylim(bottom=min(-1, ymin), top=max(1, ymax))
-
-        # Update x-axis line without recreating it
-        self._xaxis_line.set_xdata(self.axes.get_xlim())
-
-        # Much lighter than self.draw()
-        self.draw_idle()
-
-    def changeTimeFrame(self, start, end):
-        self.axes.set_xlim(end, start)
+    @pyqtSlot(float)
+    def addPointFloat(self, value):
+        self.data[self.ptr] = value
+        self.ptr = (self.ptr + 1) % self.buffer_size
+        self.curve.setData(np.roll(self.data, -self.ptr))
 
     def setTitle(self, title):
-        self.axes.set_title(title)
-
-    def setXAxisTitle(self, title):
-        self.axes.set_xlabel(title)
+        self.plot_widget.setTitle(title)
 
     def setYAxisTitle(self, title):
-        self.axes.set_ylabel(title)
+        self.plot_widget.setLabel('left', title)
+        self.plot_widget.getAxis('left').enableAutoSIPrefix(False)
 
-
-class AutoUpdateGraph(DataGraph):
-    def __init__(self, signal, history=30):
-        super().__init__(history=history)
-        self.data = TimedBuffer(180)
-        self._plotRef, = self.axes.plot([], [], lw=1.5)  # Pre-create line for efficiency
-        self._history = history
-        signal.connect(self.updateData)
-
-    def updateData(self, data):
-        self.data.add(data)
-
-        # Get only the most recent data within the window
-        items = self.data.get_items_by_age(0, self._history)
-        if not items:
-            return
-
-        # Unpack just once for efficiency
-        timestamps, ydata = zip(*items)
-        now = time.time()
-
-        # Convert timestamps into relative x-values in one pass
-        xdata = [now - t for t in timestamps]
-
-        # Directly update existing line, don't recreate
-        self._plotRef.set_data(xdata, ydata)
-
-        # Avoid unnecessary redraws
-        self.updateGraph()
-
-    def getLastValue(self):
-        values = self.data.get_values()
-        return values[-1] if values else None"""
-
+    def setXAxisTitle(self, title):
+        self.plot_widget.setLabel('bottom', title)
+        self.plot_widget.getAxis('left').enableAutoSIPrefix(False)

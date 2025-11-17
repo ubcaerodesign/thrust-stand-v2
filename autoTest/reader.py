@@ -27,12 +27,15 @@ class Runner(Transformer):
         self.scriptStart = time.time() * 1000
         self.timer = threading.Event()
 
+        self.throttle = 0
+
     def set_throttle(self, args):
         self.checkAbort()
         throttle, = args
         throttle = int(throttle)
         if 0 <= throttle <= 100:
             board.setThrottle(throttle)
+        self.throttle = throttle
 
     def read_cell_1(self, _):
         self.checkAbort()
@@ -80,7 +83,7 @@ class Runner(Transformer):
 
     def add_point(self, _):
         self.checkAbort()
-        self.addPoint(int(time.time() * 1000 - self.scriptStart))
+        self.addPoint(timer=int(time.time() * 1000 - self.scriptStart), throttle=self.throttle)
 
     def checkAbort(self):
         if self.abortFlag:
