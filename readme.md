@@ -1,6 +1,11 @@
-New UI for thrust stand
+STARTUP GUIDE
+- Go to releases
+- Download main.zip
+- Unzip main.zip
+- Run main.exe
+- Usage documentation is in the README file included in the folder
 
-Roadmap:
+ROADMAP
 - eeprom board data info
 - data visualization
 - command prompt style interaction + muting data transfers
